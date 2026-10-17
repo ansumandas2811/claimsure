@@ -1,0 +1,43 @@
+{
+  "resourceType": "Condition",
+  "id": "cond-003",
+  "clinicalStatus": {
+    "coding": [
+      {
+        "code": "active"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "code": "confirmed"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "code": "encounter-diagnosis"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10",
+        "code": "J18.9",
+        "display": "Pneumonia, unspecified organism"
+      }
+    ],
+    "text": "Pneumonia, unspecified organism"
+  },
+  "subject": {
+    "reference": "Patient/pat-003"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-003"
+  }
+}

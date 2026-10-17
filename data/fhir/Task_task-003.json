@@ -1,0 +1,40 @@
+{
+  "resourceType": "Task",
+  "id": "task-003",
+  "intent": "proposal",
+  "status": "requested",
+  "for": {
+    "reference": "Patient/pat-003"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-003"
+  },
+  "focus": {
+    "reference": "ChargeItem/charge-003-1"
+  },
+  "owner": {
+    "display": "Billing"
+  },
+  "code": {
+    "text": "room_rent_sublimit"
+  },
+  "businessStatus": {
+    "text": "medium"
+  },
+  "description": "Room rent charge of ₹9,500/night exceeds policy sub-limit of ₹5,000/night.",
+  "note": [
+    {
+      "text": "[Policy/Clause-1] \"The daily room rent, nursing, and boarding charges admissible under this policy shall not exceed ₹5,000 per day.\"",
+      "time": "2026-03-12T11:30:00Z",
+      "authorString": "ClaimSure Verification Engine"
+    }
+  ],
+  "input": [
+    {
+      "type": {
+        "text": "suggested_fix"
+      },
+      "valueString": "Apply proportionate room rent deduction of ₹4,500/night or collect differential copay from patient."
+    }
+  ]
+}

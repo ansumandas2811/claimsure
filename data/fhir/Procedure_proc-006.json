@@ -1,0 +1,19 @@
+{
+  "resourceType": "Procedure",
+  "id": "proc-006",
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "47562",
+        "display": "Laparoscopic Cholecystectomy"
+      }
+    ],
+    "text": "Laparoscopic Cholecystectomy"
+  },
+  "subject": {
+    "reference": "Patient/pat-006"
+  },
+  "performedDateTime": "2026-03-14T10:00:00Z"
+}

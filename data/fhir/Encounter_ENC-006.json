@@ -1,0 +1,18 @@
+{
+  "resourceType": "Encounter",
+  "id": "ENC-006",
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "IMP",
+    "display": "inpatient encounter"
+  },
+  "subject": {
+    "reference": "Patient/pat-006",
+    "display": "Sunita Kulkarni"
+  },
+  "period": {
+    "start": "2026-03-14T08:00:00Z",
+    "end": "2026-03-16T11:30:00Z"
+  }
+}

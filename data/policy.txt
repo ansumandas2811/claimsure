@@ -1,0 +1,32 @@
+NAVJEEVAN DEMO TPA / KAVACH DEMO GENERAL INSURANCE
+STANDARD INPATIENT HEALTH INSURANCE POLICY (REVISED 2026)
+POLICY CLAUSES & CLAIM READINESS SPECIFICATIONS
+
+CLAUSE 1: ROOM RENT AND BOARDING EXPENSES SUB-LIMIT
+1.1 Standard Hospital Room / General Ward: The daily room rent, nursing, and boarding charges admissible under this policy shall not exceed ₹5,000 per day. Any hospital room tariff exceeding ₹5,000 per day (e.g. Deluxe Suite or Executive Rooms) is subject to strict deduction of the excess tariff and proportionate deduction on associated hospital services.
+1.2 Intensive Care Unit (ICU) / Intensive Cardiac Care Unit (ICCU): Room and nursing charges for ICU stay shall not exceed ₹10,000 per day.
+
+CLAUSE 2: INTENSIVE CARE UNIT (ICU) ADMISSION AND CLINICAL JUSTIFICATION
+2.1 All billed ICU days must be supported by contemporaneous clinical documentation in the physician daily progress notes or discharge summary demonstrating acute physiological instability.
+2.2 Clinical justification criteria include: mechanical ventilation, hemodynamic instability requiring continuous vasoactive inotropic support, severe cardiac arrhythmias, acute Glasgow Coma Scale (GCS) deterioration, or invasive arterial monitoring.
+2.3 If a patient is transferred to or maintained in the ICU solely for post-operative observation without documentation of acute instability, ICU level charges are inadmissible and must be recoded to standard ward recovery care.
+
+CLAUSE 3: DIAGNOSTIC CONCORDANCE AND CLINICAL EVIDENCE
+3.1 Every primary and secondary ICD-10 diagnosis code listed on the formal hospital billing claim must be supported by positive diagnostic laboratory findings, imaging, or definitive clinical diagnosis recorded in the treating physician's signed discharge summary.
+3.2 Conditions evaluated and explicitly ruled out in clinical notes (such as rule-out Acute Myocardial Infarction where cardiac troponins are negative and non-cardiac etiology is confirmed) must not be billed as confirmed primary or secondary inpatient diagnoses.
+
+CLAUSE 4: GENERAL EXCLUSIONS AND NON-COVERED PROCEDURES
+4.1 Elective cosmetic, aesthetic, and reconstructive treatments—including but not limited to rhinoplasty, blepharoplasty, liposuction, and mammoplasty—are strictly excluded from coverage unless expressly required as immediate reconstruction resulting from acute documented accidental physical trauma during the same admission.
+4.2 Unapproved wellness supplements, vitamins without diagnosed deficiency, and convenience toiletries are non-medical expenses and excluded from claim reimbursement.
+
+CLAUSE 5: DUPLICATE CHARGES AND UNBUNDLING PROHIBITION
+5.1 Duplicate line-item charges for identical laboratory tests, radiological procedures, or surgical consumables performed on the same calendar date and timestamp without documented clinical indication for repeat testing are strictly inadmissible.
+5.2 All routine operative room supplies and sterile packs are deemed bundled within the primary surgical theatre charge and cannot be billed piecemeal.
+
+CLAUSE 6: MANDATORY CLAIM SUBMISSION DOCUMENTATION
+6.1 Every inpatient claim submitted for reimbursement or cashless settlement must include:
+(a) Signed Final Discharge Summary from the attending specialist with clinical course;
+(b) Itemized hospital bill with corresponding internal and national service codes;
+(c) Pre-authorization approval letter from Navjeevan Demo TPA;
+(d) Original investigation reports (radiology, pathology, ECG) supporting billed interventions.
+Claims missing any mandatory item will be flagged and held at the gate prior to adjudication.

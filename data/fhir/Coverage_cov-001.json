@@ -1,0 +1,26 @@
+{
+  "resourceType": "Coverage",
+  "id": "cov-001",
+  "status": "active",
+  "beneficiary": {
+    "reference": "Patient/pat-001"
+  },
+  "payor": [
+    {
+      "display": "Navjeevan Demo TPA / Kavach Demo General Insurance"
+    }
+  ],
+  "class": [
+    {
+      "type": {
+        "coding": [
+          {
+            "code": "plan"
+          }
+        ]
+      },
+      "value": "Kavach Comprehensive Health Plan",
+      "name": "Corporate Silver Plan"
+    }
+  ]
+}

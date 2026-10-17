@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-006-3",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ANES-LAP",
+        "display": "Anesthesia Care & Intraoperative Monitoring"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-006"
+  },
+  "context": {
+    "reference": "Encounter/ENC-006"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 14000,
+    "currency": "INR"
+  }
+}

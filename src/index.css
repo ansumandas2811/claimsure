@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --teal-base: #0B7A70;
+    --teal-dark: #085a53;
+    --teal-light: #e6f5f4;
+    --navy-base: #0F2A3D;
+    --navy-dark: #0a1c29;
+    --navy-light: #1e3d54;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: #1e293b;
+    background-color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}

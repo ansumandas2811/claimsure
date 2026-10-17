@@ -1,0 +1,154 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-enc-003",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient-003",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-003",
+        "identifier": [{ "system": "http://hospital.demo/mrn", "value": "MRN-IN-88212" }],
+        "name": [{ "use": "official", "family": "Sharma", "given": ["Rajesh"] }],
+        "gender": "male",
+        "birthDate": "1965-01-15"
+      },
+      "request": { "method": "POST", "url": "Patient" }
+    },
+    {
+      "fullUrl": "urn:uuid:encounter-003",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ENC-003",
+        "status": "finished",
+        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "IMP", "display": "inpatient encounter" },
+        "subject": { "reference": "Patient/pat-003", "display": "Rajesh Sharma" },
+        "period": { "start": "2026-03-08T09:00:00Z", "end": "2026-03-12T11:00:00Z" }
+      },
+      "request": { "method": "POST", "url": "Encounter" }
+    },
+    {
+      "fullUrl": "urn:uuid:coverage-003",
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-003",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-003" },
+        "payor": [{ "display": "Navjeevan Demo TPA / Kavach Demo General Insurance" }],
+        "class": [{ "type": { "coding": [{ "code": "plan" }] }, "value": "Kavach Comprehensive Health Plan", "name": "Corporate Silver Plan" }]
+      },
+      "request": { "method": "POST", "url": "Coverage" }
+    },
+    {
+      "fullUrl": "urn:uuid:condition-003",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-003",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
+        "category": [{ "coding": [{ "code": "encounter-diagnosis" }] }],
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "J18.9", "display": "Pneumonia, unspecified organism" }],
+          "text": "Pneumonia, unspecified organism"
+        },
+        "subject": { "reference": "Patient/pat-003" },
+        "encounter": { "reference": "Encounter/ENC-003" }
+      },
+      "request": { "method": "POST", "url": "Condition" }
+    },
+    {
+      "fullUrl": "urn:uuid:charge-003-1",
+      "resource": {
+        "resourceType": "ChargeItem",
+        "id": "charge-003-1",
+        "status": "billable",
+        "code": { "coding": [{ "code": "ROOM-DLX", "display": "Deluxe Suite Room Charges (4 nights @ ₹9,500/night)" }] },
+        "subject": { "reference": "Patient/pat-003" },
+        "context": { "reference": "Encounter/ENC-003" },
+        "quantity": { "value": 4 },
+        "priceOverride": { "value": 38000, "currency": "INR" }
+      },
+      "request": { "method": "POST", "url": "ChargeItem" }
+    },
+    {
+      "fullUrl": "urn:uuid:charge-003-2",
+      "resource": {
+        "resourceType": "ChargeItem",
+        "id": "charge-003-2",
+        "status": "billable",
+        "code": { "coding": [{ "code": "PHARM-IV", "display": "Intravenous Antibiotics (Ceftriaxone, Azithromycin)" }] },
+        "subject": { "reference": "Patient/pat-003" },
+        "context": { "reference": "Encounter/ENC-003" },
+        "quantity": { "value": 1 },
+        "priceOverride": { "value": 16800, "currency": "INR" }
+      },
+      "request": { "method": "POST", "url": "ChargeItem" }
+    },
+    {
+      "fullUrl": "urn:uuid:charge-003-3",
+      "resource": {
+        "resourceType": "ChargeItem",
+        "id": "charge-003-3",
+        "status": "billable",
+        "code": { "coding": [{ "code": "PT-CHEST", "display": "Chest Physiotherapy Sessions" }] },
+        "subject": { "reference": "Patient/pat-003" },
+        "context": { "reference": "Encounter/ENC-003" },
+        "quantity": { "value": 4 },
+        "priceOverride": { "value": 4000, "currency": "INR" }
+      },
+      "request": { "method": "POST", "url": "ChargeItem" }
+    },
+    {
+      "fullUrl": "urn:uuid:docref-003",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "docref-003",
+        "status": "current",
+        "type": { "coding": [{ "code": "18842-5", "display": "Discharge summary" }], "text": "Discharge Summary" },
+        "subject": { "reference": "Patient/pat-003" },
+        "context": { "encounter": [{ "reference": "Encounter/ENC-003" }] },
+        "description": "Patient Rajesh Sharma admitted with community acquired pneumonia confirmed on chest radiograph. Received IV antibiotics with prompt resolution of fever and leukocytosis. Patient elected admission to Deluxe Suite Room at patient preference. Stable at discharge on oral cefpodoxime.",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "title": "Clinical Discharge Summary",
+              "data": "UGF0aWVudCBSYWplc2ggU2hhcm1hIGFkbWl0dGVkIHdpdGggY29tbXVuaXR5IGFjcXVpcmVkIHBuZXVtb25pYSBjb25maXJtZWQgb24gY2hlc3QgcmFkaW9ncmFwaC4gUmVjZWl2ZWQgSVYgYW50aWJpb3RpY3Mgd2l0aCBwcm9tcHQgcmVzb2x1dGlvbiBvZiBmZXZlciBhbmQgbGV1a29jeXRvc2lzLiBQYXRpZW50IGVsZWN0ZWQgYWRtaXNzaW9uIHRvIERlbHV4ZSBTdWl0ZSBSb29tIGF0IHBhdGllbnQgcHJlZmVyZW5jZS4gU3RhYmxlIGF0IGRpc2NoYXJnZSBvbiBvcmFsIGNlZnBvZG94aW1lLg=="
+            }
+          }
+        ]
+      },
+      "request": { "method": "POST", "url": "DocumentReference" }
+    },
+    {
+      "fullUrl": "urn:uuid:task-003",
+      "resource": {
+        "resourceType": "Task",
+        "id": "task-003",
+        "intent": "proposal",
+        "status": "requested",
+        "for": { "reference": "Patient/pat-003" },
+        "encounter": { "reference": "Encounter/ENC-003" },
+        "focus": { "reference": "ChargeItem/charge-003-1" },
+        "owner": { "display": "Billing" },
+        "code": { "text": "room_rent_sublimit" },
+        "businessStatus": { "text": "medium" },
+        "description": "Room rent charge of ₹9,500/night exceeds policy sub-limit of ₹5,000/night.",
+        "note": [
+          {
+            "text": "[Policy/Clause-1] \"The daily room rent, nursing, and boarding charges admissible under this policy shall not exceed ₹5,000 per day.\"",
+            "time": "2026-03-12T11:30:00Z",
+            "authorString": "ClaimSure Verification Engine"
+          }
+        ],
+        "input": [
+          {
+            "type": { "text": "suggested_fix" },
+            "valueString": "Apply proportionate room rent deduction of ₹4,500/night or collect differential copay from patient."
+          }
+        ]
+      },
+      "request": { "method": "POST", "url": "Task" }
+    }
+  ]
+}

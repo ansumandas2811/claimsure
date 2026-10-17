@@ -1,0 +1,28 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-005-4",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "71045",
+        "display": "Radiologic Examination, Chest; Single View (Post-Op)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-005"
+  },
+  "context": {
+    "reference": "Encounter/ENC-005"
+  },
+  "occurrenceDateTime": "2026-03-13T10:30:00Z",
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 1800,
+    "currency": "INR"
+  }
+}

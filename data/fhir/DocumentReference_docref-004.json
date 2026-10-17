@@ -1,0 +1,34 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-004",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-004"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-004"
+      }
+    ]
+  },
+  "description": "Patient Ananya Iyer admitted for elective open aesthetic rhinoplasty for nasal tip refinement and dorsal hump reduction. No history of acute nasal trauma or structural respiratory airway obstruction. Procedure uneventful. Discharged next morning in good health with nasal splint in situ.",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBBbmFueWEgSXllciBhZG1pdHRlZCBmb3IgZWxlY3RpdmUgb3BlbiBhZXN0aGV0aWMgcmhpbm9wbGFzdHkgZm9yIG5hc2FsIHRpcCByZWZpbmVtZW50IGFuZCBkb3JzYWwgaHVtcCByZWR1Y3Rpb24uIE5vIGhpc3Rvcnkgb2YgYWN1dGUgbmFzYWwgdHJhdW1hIG9yIHN0cnVjdHVyYWwgcmVzcGlyYXRvcnkgYWlyd2F5IG9ic3RydWN0aW9uLiBQcm9jZWR1cmUgdW5ldmVudGZ1bC4gRGlzY2hhcmdlZCBuZXh0IG1vcm5pbmcgaW4gZ29vZCBoZWFsdGggd2l0aCBuYXNhbCBzcGxpbnQgaW4gc2l0dS4="
+      }
+    }
+  ]
+}

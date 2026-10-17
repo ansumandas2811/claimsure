@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-001-3",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-GEN",
+        "display": "General Ward Recovery Bed (1 day)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-001"
+  },
+  "context": {
+    "reference": "Encounter/ENC-001"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 45000,
+    "currency": "INR"
+  }
+}

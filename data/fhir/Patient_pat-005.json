@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-005",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88214"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Malhotra",
+      "given": [
+        "Vikram"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1988-11-04"
+}

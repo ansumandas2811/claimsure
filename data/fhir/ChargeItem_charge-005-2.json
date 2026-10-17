@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-005-2",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "IMPLANT-TIB",
+        "display": "Orthopedic Titanium Locking Plate & Screws"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-005"
+  },
+  "context": {
+    "reference": "Encounter/ENC-005"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 48000,
+    "currency": "INR"
+  }
+}

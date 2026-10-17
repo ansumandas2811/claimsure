@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-004-3",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-PVT",
+        "display": "Private Daycare Recovery Room (1 day)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-004"
+  },
+  "context": {
+    "reference": "Encounter/ENC-004"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 4500,
+    "currency": "INR"
+  }
+}

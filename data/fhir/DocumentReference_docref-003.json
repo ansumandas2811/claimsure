@@ -1,0 +1,34 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-003",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-003"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-003"
+      }
+    ]
+  },
+  "description": "Patient Rajesh Sharma admitted with community acquired pneumonia confirmed on chest radiograph. Received IV antibiotics with prompt resolution of fever and leukocytosis. Patient elected admission to Deluxe Suite Room at patient preference. Stable at discharge on oral cefpodoxime.",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBSYWplc2ggU2hhcm1hIGFkbWl0dGVkIHdpdGggY29tbXVuaXR5IGFjcXVpcmVkIHBuZXVtb25pYSBjb25maXJtZWQgb24gY2hlc3QgcmFkaW9ncmFwaC4gUmVjZWl2ZWQgSVYgYW50aWJpb3RpY3Mgd2l0aCBwcm9tcHQgcmVzb2x1dGlvbiBvZiBmZXZlciBhbmQgbGV1a29jeXRvc2lzLiBQYXRpZW50IGVsZWN0ZWQgYWRtaXNzaW9uIHRvIERlbHV4ZSBTdWl0ZSBSb29tIGF0IHBhdGllbnQgcHJlZmVyZW5jZS4gU3RhYmxlIGF0IGRpc2NoYXJnZSBvbiBvcmFsIGNlZnBvZG94aW1lLg=="
+      }
+    }
+  ]
+}

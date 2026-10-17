@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-004",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88213"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Iyer",
+      "given": [
+        "Ananya"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1997-06-18"
+}

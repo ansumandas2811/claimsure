@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-003-1",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-DLX",
+        "display": "Deluxe Suite Room Charges (4 nights @ ₹9,500/night)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-003"
+  },
+  "context": {
+    "reference": "Encounter/ENC-003"
+  },
+  "quantity": {
+    "value": 4
+  },
+  "priceOverride": {
+    "value": 38000,
+    "currency": "INR"
+  }
+}

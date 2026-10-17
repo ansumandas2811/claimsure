@@ -1,0 +1,34 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-002",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-002"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-002"
+      }
+    ]
+  },
+  "description": "Patient Priya Sundaram presented with acute retrosternal chest discomfort and burning sensation. Admitted to rule out acute coronary syndrome. Serial high-sensitivity Troponin-I at 0, 3, and 6 hours returned strictly negative (<0.01 ng/mL). 12-lead ECG demonstrated normal sinus rhythm without ischemic ST-T changes. Upper GI evaluation revealed marked gastroesophageal reflux. Final clinical diagnosis: Gastro-esophageal reflux disease without esophagitis (K21.9). Acute myocardial infarction (I21.9) was definitively ruled out. Patient symptomatically relieved with intravenous pantoprazole.",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBQcml5YSBTdW5kYXJhbSBwcmVzZW50ZWQgd2l0aCBhY3V0ZSByZXRyb3N0ZXJuYWwgY2hlc3QgZGlzY29tZm9ydCBhbmQgYnVybmluZyBzZW5zYXRpb24uIEFkbWl0dGVkIHRvIHJ1bGUgb3V0IGFjdXRlIGNvcm9uYXJ5IHN5bmRyb21lLiBTZXJpYWwgaGlnaC1zZW5zaXRpdml0eSBUcm9wb25pbi1JIGF0IDAsIDMsIGFuZCA2IGhvdXJzIHJldHVybmVkIHN0cmljdGx5IG5lZ2F0aXZlICg8MC4wMSBuZy9tTCkuIDEyLWxlYWQgRUNHIGRlbW9uc3RyYXRlZCBub3JtYWwgc2ludXMgcmh5dGhtIHdpdGhvdXQgaXNjaGVtaWMgU1QtVCBjaGFuZ2VzLiBVcHBlciBHSSBldmFsdWF0aW9uIHJldmVhbGVkIG1hcmtlZCBnYXN0cm9lc29waGFnZWFsIHJlZmx1eC4gRmluYWwgY2xpbmljYWwgZGlhZ25vc2lzOiBHYXN0cm8tZXNvcGhhZ2VhbCByZWZsdXggZGlzZWFzZSB3aXRob3V0IGVzb3BoYWdpdGlzIChLMjEuOSkuIEFjdXRlIG15b2NhcmRpYWwgaW5mYXJjdGlvbiAoSTIxLjkpIHdhcyBkZWZpbml0aXZlbHkgcnVsZWQgb3V0LiBQYXRpZW50IHN5bXB0b21hdGljYWxseSByZWxpZXZlZCB3aXRoIGludHJhdmVub3VzIHBhbnRvcHJhem9sZS4="
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-004-2",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "OR-MAJOR",
+        "display": "Operating Theatre & Plastic Surgery Console"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-004"
+  },
+  "context": {
+    "reference": "Encounter/ENC-004"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 55000,
+    "currency": "INR"
+  }
+}

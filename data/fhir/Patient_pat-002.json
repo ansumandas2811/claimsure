@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-002",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88211"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Sundaram",
+      "given": [
+        "Priya"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1978-09-23"
+}

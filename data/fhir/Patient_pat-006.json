@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-006",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88215"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Kulkarni",
+      "given": [
+        "Sunita"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1983-05-14"
+}

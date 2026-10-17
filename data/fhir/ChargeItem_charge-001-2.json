@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-001-2",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ICU-DAY",
+        "display": "Intensive Care Unit (ICU) Bed & Monitoring Charges"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-001"
+  },
+  "context": {
+    "reference": "Encounter/ENC-001"
+  },
+  "quantity": {
+    "value": 3
+  },
+  "priceOverride": {
+    "value": 54000,
+    "currency": "INR"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "encounters": [
+    {
+      "encounterId": "ENC-001",
+      "patientName": "Aarav Patel",
+      "issueCategory": "icu_justification",
+      "expectedSeverity": "high",
+      "assigneeRole": "doctor",
+      "expectedGate": "Blocked",
+      "summary": "3 ICU days billed with no ICU justification in clinical discharge notes"
+    },
+    {
+      "encounterId": "ENC-002",
+      "patientName": "Priya Sundaram",
+      "issueCategory": "diagnosis_support",
+      "expectedSeverity": "high",
+      "assigneeRole": "billing",
+      "expectedGate": "Blocked",
+      "summary": "Diagnosis on claim (I21.9 Acute Myocardial Infarction) not supported by clinical notes (ruled out MI, confirmed GERD)"
+    },
+    {
+      "encounterId": "ENC-003",
+      "patientName": "Rajesh Sharma",
+      "issueCategory": "room_rent_sublimit",
+      "expectedSeverity": "medium",
+      "assigneeRole": "billing",
+      "expectedGate": "Needs review",
+      "summary": "Room rent charge of ₹9,500/night exceeds policy sub-limit of ₹5,000/night"
+    },
+    {
+      "encounterId": "ENC-004",
+      "patientName": "Ananya Iyer",
+      "issueCategory": "policy_exclusion",
+      "expectedSeverity": "high",
+      "assigneeRole": "billing",
+      "expectedGate": "Blocked",
+      "summary": "Elective cosmetic rhinoplasty billed under general surgery, falling under Clause 4 policy exclusions"
+    },
+    {
+      "encounterId": "ENC-005",
+      "patientName": "Vikram Malhotra",
+      "issueCategory": "duplicate_charge",
+      "expectedSeverity": "medium",
+      "assigneeRole": "billing",
+      "expectedGate": "Needs review",
+      "summary": "Duplicate itemized charge for Post-Op Chest X-Ray (CPT 71045, ₹1,800) billed twice at identical timestamp"
+    },
+    {
+      "encounterId": "ENC-006",
+      "patientName": "Sunita Kulkarni",
+      "issueCategory": "clean",
+      "expectedSeverity": "low",
+      "assigneeRole": "billing",
+      "expectedGate": "Ready",
+      "summary": "Clean encounter with verified clinical notes, authorized stay, matching charges, and complete documentation"
+    }
+  ]
+}

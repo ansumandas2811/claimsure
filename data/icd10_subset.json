@@ -1,0 +1,51 @@
+{
+  "I21.9": {
+    "code": "I21.9",
+    "description": "Acute myocardial infarction, unspecified",
+    "chapter": "Diseases of the circulatory system",
+    "clinical_criteria": "Requires documented elevation of cardiac biomarkers (troponin I/T) above 99th percentile with ischemic symptoms, characteristic ECG ST-T wave changes, or pathological Q waves. Cannot be assigned if troponins are strictly negative and ischemia is ruled out.",
+    "billable": true
+  },
+  "K21.9": {
+    "code": "K21.9",
+    "description": "Gastro-esophageal reflux disease without esophagitis",
+    "chapter": "Diseases of the digestive system",
+    "clinical_criteria": "Clinical symptom complex of heartburn, acid regurgitation, or non-cardiac retrosternal chest pain responsive to proton pump inhibitors or confirmed by endoscopy.",
+    "billable": true
+  },
+  "K80.20": {
+    "code": "K80.20",
+    "description": "Calculus of gallbladder without cholecystitis without obstruction",
+    "chapter": "Diseases of the digestive system",
+    "clinical_criteria": "Ultrasound demonstration of gallstones (cholelithiasis) with recurrent biliary colic symptoms warranting elective or emergency cholecystectomy.",
+    "billable": true
+  },
+  "Z41.1": {
+    "code": "Z41.1",
+    "description": "Encounter for cosmetic surgery",
+    "chapter": "Factors influencing health status and contact with health services",
+    "clinical_criteria": "Elective aesthetic modification or cosmetic rhinoplasty performed for personal appearance without documented acute structural trauma or reconstructive defect.",
+    "billable": false
+  },
+  "J18.9": {
+    "code": "J18.9",
+    "description": "Pneumonia, unspecified organism",
+    "chapter": "Diseases of the respiratory system",
+    "clinical_criteria": "Fever, cough, sputum production with confirmatory pulmonary consolidation or infiltrates on chest imaging.",
+    "billable": true
+  },
+  "S82.101A": {
+    "code": "S82.101A",
+    "description": "Unspecified fracture of upper end of right tibia, initial encounter for closed fracture",
+    "chapter": "Injury, poisoning and certain other consequences of external causes",
+    "clinical_criteria": "Documented acute radiological evidence of proximal tibial fracture requiring reduction, internal fixation, or casting.",
+    "billable": true
+  },
+  "E11.9": {
+    "code": "E11.9",
+    "description": "Type 2 diabetes mellitus without complications",
+    "chapter": "Endocrine, nutritional and metabolic diseases",
+    "clinical_criteria": "Elevated fasting blood glucose or HbA1c >= 6.5% under ongoing medical management.",
+    "billable": true
+  }
+}

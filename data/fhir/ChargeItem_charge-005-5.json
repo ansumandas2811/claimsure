@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-005-5",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-SEMI",
+        "display": "Semi-Private Inpatient Ward (3 days @ ₹4,200/day)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-005"
+  },
+  "context": {
+    "reference": "Encounter/ENC-005"
+  },
+  "quantity": {
+    "value": 3
+  },
+  "priceOverride": {
+    "value": 12600,
+    "currency": "INR"
+  }
+}

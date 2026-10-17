@@ -1,0 +1,33 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-001",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-001"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-001"
+      }
+    ]
+  },
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBBYXJhdiBQYXRlbCB3YXMgYWRtaXR0ZWQgZm9yIGVsZWN0aXZlIGxhcGFyb3Njb3BpYyBjaG9sZWN5c3RlY3RvbXkgZm9yIHN5bXB0b21hdGljIGNob2xlbGl0aGlhc2lzLiBQcm9jZWR1cmUgcGVyZm9ybWVkIHVuZGVyIGdlbmVyYWwgYW5lc3RoZXNpYSB3aXRob3V0IGludHJhb3BlcmF0aXZlIGNvbXBsaWNhdGlvbnMuIFBvc3RvcGVyYXRpdmVseSwgcGF0aWVudCB0cmFuc2ZlcnJlZCB0byBJQ1UgZm9yIG92ZXJuaWdodCByb3V0aW5lIG1vbml0b3JpbmcgYXQgZmFtaWx5IHJlcXVlc3QuIFBhdGllbnQgcmVtYWluZWQgaGVtb2R5bmFtaWNhbGx5IHN0YWJsZSwgYWZlYnJpbGUsIHNhdHVyYXRpbmcgOTklIG9uIHJvb20gYWlyIHRocm91Z2hvdXQgc3RheS4gVml0YWxzOiBCUCAxMjQvODIsIEhSIDc0IHJlZ3VsYXIsIFJSIDE2LCBubyBpbm90cm9wZXMgb3IgdmVudGlsYXRvciBuZWVkZWQuIFBhdGllbnQgdHJhbnNpdGlvbmVkIHRvIGxpcXVpZCBkaWV0IG9uIFBPRCAyLCBhbWJ1bGF0aW5nIHdlbGwsIGRpc2NoYXJnZWQgaG9tZSBpbiBzdGFibGUgY29uZGl0aW9uLg=="
+      }
+    }
+  ]
+}

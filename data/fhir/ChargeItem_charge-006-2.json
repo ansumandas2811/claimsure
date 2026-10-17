@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-006-2",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-TWIN",
+        "display": "Twin-Sharing General Ward (2 days @ ₹3,800/day)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-006"
+  },
+  "context": {
+    "reference": "Encounter/ENC-006"
+  },
+  "quantity": {
+    "value": 2
+  },
+  "priceOverride": {
+    "value": 7600,
+    "currency": "INR"
+  }
+}

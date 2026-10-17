@@ -1,0 +1,4 @@
+mrn,patient_name,gender,dob,admit_date,discharge_date,ward_type,insurance_payer
+IN-HIS-90101,Rohan Deshmukh,M,1985-07-14,03/01/2026 09:30,06-Mar-2026,General Inpatient,Navjeevan Demo TPA / Kavach Demo General Insurance
+IN-HIS-90102,Deepa Nair,F,12/11/1990,2026.03.02 14:15,2026/03/05,Semi-Private,Navjeevan Demo TPA / Kavach Demo General Insurance
+IN-HIS-90103,Karan Singhania,M,1976-03-29,04-03-2026 11:00,08/03/2026,Deluxe Ward,Navjeevan Demo TPA / Kavach Demo General Insurance

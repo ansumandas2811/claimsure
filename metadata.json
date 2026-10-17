@@ -1,0 +1,8 @@
+{
+  "name": "ClaimSure",
+  "description": "Hospital claim-readiness agent for billing teams and medical directors, validating FHIR R4 claims against clinical documentation and payer policies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

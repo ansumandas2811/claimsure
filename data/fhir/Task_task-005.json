@@ -1,0 +1,40 @@
+{
+  "resourceType": "Task",
+  "id": "task-005",
+  "intent": "proposal",
+  "status": "requested",
+  "for": {
+    "reference": "Patient/pat-005"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-005"
+  },
+  "focus": {
+    "reference": "ChargeItem/charge-005-4"
+  },
+  "owner": {
+    "display": "Billing"
+  },
+  "code": {
+    "text": "duplicate_charge"
+  },
+  "businessStatus": {
+    "text": "medium"
+  },
+  "description": "Duplicate itemized line item charge for Post-Op Chest X-Ray (CPT 71045, ₹1,800).",
+  "note": [
+    {
+      "text": "[Policy/Clause-5] \"Duplicate line-item charges for identical laboratory tests, radiological procedures, or surgical consumables performed on the same calendar date and timestamp... are strictly inadmissible.\"",
+      "time": "2026-03-15T15:30:00Z",
+      "authorString": "ClaimSure Verification Engine"
+    }
+  ],
+  "input": [
+    {
+      "type": {
+        "text": "suggested_fix"
+      },
+      "valueString": "Reverse duplicate ChargeItem charge-005-4 (₹1,800) from institutional claim ledger."
+    }
+  ]
+}

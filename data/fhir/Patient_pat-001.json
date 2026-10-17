@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-001",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88210"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Patel",
+      "given": [
+        "Aarav"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1972-04-12"
+}

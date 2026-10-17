@@ -1,0 +1,19 @@
+{
+  "resourceType": "Procedure",
+  "id": "proc-004",
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "30420",
+        "display": "Open Rhinoplasty & Septal Cartilage Graft"
+      }
+    ],
+    "text": "Open Rhinoplasty & Septal Cartilage Graft"
+  },
+  "subject": {
+    "reference": "Patient/pat-004"
+  },
+  "performedDateTime": "2026-03-10T11:00:00Z"
+}

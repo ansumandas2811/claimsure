@@ -1,0 +1,21 @@
+{
+  "resourceType": "Patient",
+  "id": "pat-003",
+  "identifier": [
+    {
+      "system": "http://hospital.demo/mrn",
+      "value": "MRN-IN-88212"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Sharma",
+      "given": [
+        "Rajesh"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1965-01-15"
+}

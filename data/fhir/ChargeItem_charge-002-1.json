@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-002-1",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "EM-99223",
+        "display": "High Complexity Inpatient Medical Care"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-002"
+  },
+  "context": {
+    "reference": "Encounter/ENC-002"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 15000,
+    "currency": "INR"
+  }
+}

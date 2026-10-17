@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-005-1",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "OR-27535",
+        "display": "ORIF Tibia Operating Theatre Fee"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-005"
+  },
+  "context": {
+    "reference": "Encounter/ENC-005"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 62000,
+    "currency": "INR"
+  }
+}

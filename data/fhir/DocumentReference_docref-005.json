@@ -1,0 +1,34 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-005",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-005"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-005"
+      }
+    ]
+  },
+  "description": "Patient Vikram Malhotra sustained closed right proximal tibia fracture following a road traffic slip. Successfully underwent ORIF right tibia with locking plate. Post-operative chest radiograph was clear. Recovery uneventful, weight bearing restricted.",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBWaWtyYW0gTWFsaG90cmEgc3VzdGFpbmVkIGNsb3NlZCByaWdodCBwcm94aW1hbCB0aWJpYSBmcmFjdHVyZSBmb2xsb3dpbmcgYSByb2FkIHRyYWZmaWMgc2xpcC4gU3VjY2Vzc2Z1bGx5IHVuZGVyd2VudCBPUklGIHJpZ2h0IHRpYmlhIHdpdGggbG9ja2luZyBwbGF0ZS4gUG9zdC1vcGVyYXRpdmUgY2hlc3QgcmFkaW9ncmFwaCB3YXMgY2xlYXIuIFJlY292ZXJ5IHVuZXZlbnRmdWwsIHdlaWdodCBiZWFyaW5nIHJlc3RyaWN0ZWQu"
+      }
+    }
+  ]
+}

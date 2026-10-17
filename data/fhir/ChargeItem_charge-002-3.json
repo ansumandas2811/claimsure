@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-002-3",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "ROOM-MED",
+        "display": "Special Inpatient Medical Ward (3 days @ ₹4,800)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-002"
+  },
+  "context": {
+    "reference": "Encounter/ENC-002"
+  },
+  "quantity": {
+    "value": 3
+  },
+  "priceOverride": {
+    "value": 14400,
+    "currency": "INR"
+  }
+}

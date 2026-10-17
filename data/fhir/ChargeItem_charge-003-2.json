@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-003-2",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "PHARM-IV",
+        "display": "Intravenous Antibiotics (Ceftriaxone, Azithromycin)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-003"
+  },
+  "context": {
+    "reference": "Encounter/ENC-003"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 16800,
+    "currency": "INR"
+  }
+}

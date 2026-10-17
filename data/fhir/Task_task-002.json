@@ -1,0 +1,40 @@
+{
+  "resourceType": "Task",
+  "id": "task-002",
+  "intent": "proposal",
+  "status": "requested",
+  "for": {
+    "reference": "Patient/pat-002"
+  },
+  "encounter": {
+    "reference": "Encounter/ENC-002"
+  },
+  "focus": {
+    "reference": "Condition/cond-002"
+  },
+  "owner": {
+    "display": "Billing"
+  },
+  "code": {
+    "text": "diagnosis_support"
+  },
+  "businessStatus": {
+    "text": "high"
+  },
+  "description": "Diagnosis on claim (I21.9 Acute Myocardial Infarction) not supported by notes.",
+  "note": [
+    {
+      "text": "[DocumentReference/docref-002] \"Acute myocardial infarction (I21.9) was definitively ruled out. Final clinical diagnosis: Gastro-esophageal reflux disease without esophagitis (K21.9).\"",
+      "time": "2026-03-07T12:30:00Z",
+      "authorString": "ClaimSure Verification Engine"
+    }
+  ],
+  "input": [
+    {
+      "type": {
+        "text": "suggested_fix"
+      },
+      "valueString": "Re-code primary diagnosis from I21.9 to K21.9 in concordance with negative troponins and signed discharge summary."
+    }
+  ]
+}

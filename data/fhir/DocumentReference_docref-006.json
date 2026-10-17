@@ -1,0 +1,34 @@
+{
+  "resourceType": "DocumentReference",
+  "id": "docref-006",
+  "status": "current",
+  "type": {
+    "coding": [
+      {
+        "code": "18842-5",
+        "display": "Discharge summary"
+      }
+    ],
+    "text": "Discharge Summary"
+  },
+  "subject": {
+    "reference": "Patient/pat-006"
+  },
+  "context": {
+    "encounter": [
+      {
+        "reference": "Encounter/ENC-006"
+      }
+    ]
+  },
+  "description": "Patient Sunita Kulkarni presented with symptomatic cholelithiasis documented on abdominal ultrasound. Underwent elective laparoscopic cholecystectomy without complication. Postoperative course uneventful. Tolerated normal diet, afebrile, wound clean and dry. Discharged in stable condition. Pre-authorization approved by Navjeevan Demo TPA (Ref # MA-2026-98124).",
+  "content": [
+    {
+      "attachment": {
+        "contentType": "text/plain",
+        "title": "Clinical Discharge Summary",
+        "data": "UGF0aWVudCBTdW5pdGEgS3Vsa2FybmsgcHJlc2VudGVkIHdpdGggc3ltcHRvbWF0aWMgY2hvbGVsaXRoaWFzaXMgZG9jdW1lbnRlZCBvbiBhYmRvbWluYWwgdWx0cmFzb3VuZC4gVW5kZXJ3ZW50IGVsZWN0aXZlIGxhcGFyb3Njb3BpYyBjaG9sZWN5c3RlY3RvbXkgd2l0aG91dCBjb21wbGljYXRpb24uIFBvc3RvcGVyYXRpdmUgY291cnNlIHVuZXZlbnRmdWwuIFRvbGVyYXRlZCBub3JtYWwgZGlldCwgYWZlYnJpbGUsIHdvdW5kIGNsZWFuIGFuZCBkcnkuIERpc2NoYXJnZWQgaW4gc3RhYmxlIGNvbmRpdGlvbi4gUHJlLWF1dGhvcml6YXRpb24gYXBwcm92ZWQgYnkgTWVkaUFzc2lzdCBUUEEgKFJlZiAjIE1BLTIwMjYtOTgxMjQpLg=="
+      }
+    }
+  ]
+}

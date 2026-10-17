@@ -1,0 +1,26 @@
+{
+  "resourceType": "ChargeItem",
+  "id": "charge-001-1",
+  "status": "billable",
+  "code": {
+    "coding": [
+      {
+        "code": "OR-47562",
+        "display": "Laparoscopic Cholecystectomy Theatre Fee"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat-001"
+  },
+  "context": {
+    "reference": "Encounter/ENC-001"
+  },
+  "quantity": {
+    "value": 1
+  },
+  "priceOverride": {
+    "value": 45000,
+    "currency": "INR"
+  }
+}
