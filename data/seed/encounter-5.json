@@ -8,12 +8,28 @@
       "resource": {
         "resourceType": "Patient",
         "id": "pat-005",
-        "identifier": [{ "system": "http://hospital.demo/mrn", "value": "MRN-IN-88214" }],
-        "name": [{ "use": "official", "family": "Malhotra", "given": ["Vikram"] }],
+        "identifier": [
+          {
+            "system": "http://hospital.demo/mrn",
+            "value": "MRN-IN-88214"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Malhotra",
+            "given": [
+              "Vikram"
+            ]
+          }
+        ],
         "gender": "male",
         "birthDate": "1988-11-04"
       },
-      "request": { "method": "POST", "url": "Patient" }
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
     },
     {
       "fullUrl": "urn:uuid:encounter-005",
@@ -21,11 +37,24 @@
         "resourceType": "Encounter",
         "id": "ENC-005",
         "status": "finished",
-        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "IMP", "display": "inpatient encounter" },
-        "subject": { "reference": "Patient/pat-005", "display": "Vikram Malhotra" },
-        "period": { "start": "2026-03-12T07:15:00Z", "end": "2026-03-15T15:00:00Z" }
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "subject": {
+          "reference": "Patient/pat-005",
+          "display": "Vikram Malhotra"
+        },
+        "period": {
+          "start": "2026-03-12T07:15:00Z",
+          "end": "2026-03-15T15:00:00Z"
+        }
       },
-      "request": { "method": "POST", "url": "Encounter" }
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
     },
     {
       "fullUrl": "urn:uuid:coverage-005",
@@ -33,28 +62,82 @@
         "resourceType": "Coverage",
         "id": "cov-005",
         "status": "active",
-        "beneficiary": { "reference": "Patient/pat-005" },
-        "payor": [{ "display": "Navjeevan Demo TPA / Kavach Demo General Insurance" }],
-        "class": [{ "type": { "coding": [{ "code": "plan" }] }, "value": "Kavach Comprehensive Health Plan", "name": "Corporate Silver Plan" }]
+        "beneficiary": {
+          "reference": "Patient/pat-005"
+        },
+        "payor": [
+          {
+            "display": "Navjeevan Demo TPA / Kavach Demo General Insurance"
+          }
+        ],
+        "class": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "code": "plan"
+                }
+              ]
+            },
+            "value": "Kavach Comprehensive Health Plan",
+            "name": "Corporate Silver Plan"
+          }
+        ]
       },
-      "request": { "method": "POST", "url": "Coverage" }
+      "request": {
+        "method": "POST",
+        "url": "Coverage"
+      }
     },
     {
       "fullUrl": "urn:uuid:condition-005",
       "resource": {
         "resourceType": "Condition",
         "id": "cond-005",
-        "clinicalStatus": { "coding": [{ "code": "active" }] },
-        "verificationStatus": { "coding": [{ "code": "confirmed" }] },
-        "category": [{ "coding": [{ "code": "encounter-diagnosis" }] }],
+        "clinicalStatus": {
+          "coding": [
+            {
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "encounter-diagnosis"
+              }
+            ]
+          }
+        ],
         "code": {
-          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10", "code": "S82.101A", "display": "Fracture of upper end of right tibia, closed" }],
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "code": "S82.101A",
+              "display": "Fracture of upper end of right tibia, closed"
+            }
+          ],
           "text": "Fracture of upper end of right tibia, closed"
         },
-        "subject": { "reference": "Patient/pat-005" },
-        "encounter": { "reference": "Encounter/ENC-005" }
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "encounter": {
+          "reference": "Encounter/ENC-005"
+        }
       },
-      "request": { "method": "POST", "url": "Condition" }
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
     },
     {
       "fullUrl": "urn:uuid:procedure-005",
@@ -63,13 +146,24 @@
         "id": "proc-005",
         "status": "completed",
         "code": {
-          "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "27535", "display": "Open reduction proximal tibia fracture with internal fixation" }],
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "27535",
+              "display": "Open reduction proximal tibia fracture with internal fixation"
+            }
+          ],
           "text": "Open reduction proximal tibia fracture with internal fixation"
         },
-        "subject": { "reference": "Patient/pat-005" },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
         "performedDateTime": "2026-03-12T10:00:00Z"
       },
-      "request": { "method": "POST", "url": "Procedure" }
+      "request": {
+        "method": "POST",
+        "url": "Procedure"
+      }
     },
     {
       "fullUrl": "urn:uuid:charge-005-1",
@@ -77,13 +171,32 @@
         "resourceType": "ChargeItem",
         "id": "charge-005-1",
         "status": "billable",
-        "code": { "coding": [{ "code": "OR-27535", "display": "ORIF Tibia Operating Theatre Fee" }] },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "reference": "Encounter/ENC-005" },
-        "quantity": { "value": 1 },
-        "priceOverride": { "value": 62000, "currency": "INR" }
+        "code": {
+          "coding": [
+            {
+              "code": "OR-27535",
+              "display": "ORIF Tibia Operating Theatre Fee"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "reference": "Encounter/ENC-005"
+        },
+        "quantity": {
+          "value": 1
+        },
+        "priceOverride": {
+          "value": 62000,
+          "currency": "INR"
+        }
       },
-      "request": { "method": "POST", "url": "ChargeItem" }
+      "request": {
+        "method": "POST",
+        "url": "ChargeItem"
+      }
     },
     {
       "fullUrl": "urn:uuid:charge-005-2",
@@ -91,13 +204,32 @@
         "resourceType": "ChargeItem",
         "id": "charge-005-2",
         "status": "billable",
-        "code": { "coding": [{ "code": "IMPLANT-TIB", "display": "Orthopedic Titanium Locking Plate & Screws" }] },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "reference": "Encounter/ENC-005" },
-        "quantity": { "value": 1 },
-        "priceOverride": { "value": 48000, "currency": "INR" }
+        "code": {
+          "coding": [
+            {
+              "code": "IMPLANT-TIB",
+              "display": "Orthopedic Titanium Locking Plate & Screws"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "reference": "Encounter/ENC-005"
+        },
+        "quantity": {
+          "value": 1
+        },
+        "priceOverride": {
+          "value": 48000,
+          "currency": "INR"
+        }
       },
-      "request": { "method": "POST", "url": "ChargeItem" }
+      "request": {
+        "method": "POST",
+        "url": "ChargeItem"
+      }
     },
     {
       "fullUrl": "urn:uuid:charge-005-3",
@@ -105,14 +237,34 @@
         "resourceType": "ChargeItem",
         "id": "charge-005-3",
         "status": "billable",
-        "code": { "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "71045", "display": "Radiologic Examination, Chest; Single View (Post-Op)" }] },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "reference": "Encounter/ENC-005" },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "71045",
+              "display": "Radiologic Examination, Chest; Single View (Post-Op)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "reference": "Encounter/ENC-005"
+        },
         "occurrenceDateTime": "2026-03-13T10:30:00Z",
-        "quantity": { "value": 1 },
-        "priceOverride": { "value": 1800, "currency": "INR" }
+        "quantity": {
+          "value": 1
+        },
+        "priceOverride": {
+          "value": 1800,
+          "currency": "INR"
+        }
       },
-      "request": { "method": "POST", "url": "ChargeItem" }
+      "request": {
+        "method": "POST",
+        "url": "ChargeItem"
+      }
     },
     {
       "fullUrl": "urn:uuid:charge-005-4",
@@ -120,14 +272,34 @@
         "resourceType": "ChargeItem",
         "id": "charge-005-4",
         "status": "billable",
-        "code": { "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "71045", "display": "Radiologic Examination, Chest; Single View (Post-Op)" }] },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "reference": "Encounter/ENC-005" },
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "71045",
+              "display": "Radiologic Examination, Chest; Single View (Post-Op)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "reference": "Encounter/ENC-005"
+        },
         "occurrenceDateTime": "2026-03-13T10:30:00Z",
-        "quantity": { "value": 1 },
-        "priceOverride": { "value": 1800, "currency": "INR" }
+        "quantity": {
+          "value": 1
+        },
+        "priceOverride": {
+          "value": 1800,
+          "currency": "INR"
+        }
       },
-      "request": { "method": "POST", "url": "ChargeItem" }
+      "request": {
+        "method": "POST",
+        "url": "ChargeItem"
+      }
     },
     {
       "fullUrl": "urn:uuid:charge-005-5",
@@ -135,13 +307,32 @@
         "resourceType": "ChargeItem",
         "id": "charge-005-5",
         "status": "billable",
-        "code": { "coding": [{ "code": "ROOM-SEMI", "display": "Semi-Private Inpatient Ward (3 days @ ₹4,200/day)" }] },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "reference": "Encounter/ENC-005" },
-        "quantity": { "value": 3 },
-        "priceOverride": { "value": 12600, "currency": "INR" }
+        "code": {
+          "coding": [
+            {
+              "code": "ROOM-SEMI",
+              "display": "Semi-Private Inpatient Ward (3 days @ \u20b94,200/day)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "reference": "Encounter/ENC-005"
+        },
+        "quantity": {
+          "value": 3
+        },
+        "priceOverride": {
+          "value": 12600,
+          "currency": "INR"
+        }
       },
-      "request": { "method": "POST", "url": "ChargeItem" }
+      "request": {
+        "method": "POST",
+        "url": "ChargeItem"
+      }
     },
     {
       "fullUrl": "urn:uuid:docref-005",
@@ -149,9 +340,25 @@
         "resourceType": "DocumentReference",
         "id": "docref-005",
         "status": "current",
-        "type": { "coding": [{ "code": "18842-5", "display": "Discharge summary" }], "text": "Discharge Summary" },
-        "subject": { "reference": "Patient/pat-005" },
-        "context": { "encounter": [{ "reference": "Encounter/ENC-005" }] },
+        "type": {
+          "coding": [
+            {
+              "code": "18842-5",
+              "display": "Discharge summary"
+            }
+          ],
+          "text": "Discharge Summary"
+        },
+        "subject": {
+          "reference": "Patient/pat-005"
+        },
+        "context": {
+          "encounter": [
+            {
+              "reference": "Encounter/ENC-005"
+            }
+          ]
+        },
         "description": "Patient Vikram Malhotra sustained closed right proximal tibia fracture following a road traffic slip. Successfully underwent ORIF right tibia with locking plate. Post-operative chest radiograph was clear. Recovery uneventful, weight bearing restricted.",
         "content": [
           {
@@ -163,37 +370,10 @@
           }
         ]
       },
-      "request": { "method": "POST", "url": "DocumentReference" }
-    },
-    {
-      "fullUrl": "urn:uuid:task-005",
-      "resource": {
-        "resourceType": "Task",
-        "id": "task-005",
-        "intent": "proposal",
-        "status": "requested",
-        "for": { "reference": "Patient/pat-005" },
-        "encounter": { "reference": "Encounter/ENC-005" },
-        "focus": { "reference": "ChargeItem/charge-005-4" },
-        "owner": { "display": "Billing" },
-        "code": { "text": "duplicate_charge" },
-        "businessStatus": { "text": "medium" },
-        "description": "Duplicate itemized line item charge for Post-Op Chest X-Ray (CPT 71045, ₹1,800).",
-        "note": [
-          {
-            "text": "[Policy/Clause-5] \"Duplicate line-item charges for identical laboratory tests, radiological procedures, or surgical consumables performed on the same calendar date and timestamp... are strictly inadmissible.\"",
-            "time": "2026-03-15T15:30:00Z",
-            "authorString": "ClaimSure Verification Engine"
-          }
-        ],
-        "input": [
-          {
-            "type": { "text": "suggested_fix" },
-            "valueString": "Reverse duplicate ChargeItem charge-005-4 (₹1,800) from institutional claim ledger."
-          }
-        ]
-      },
-      "request": { "method": "POST", "url": "Task" }
+      "request": {
+        "method": "POST",
+        "url": "DocumentReference"
+      }
     }
   ]
 }

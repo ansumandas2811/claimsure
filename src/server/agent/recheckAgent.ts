@@ -38,58 +38,46 @@ export async function recheckTask(taskId: string): Promise<{ task: Task; resolve
   let resolved = false;
   let newEvidenceQuote = '';
 
-  // Evaluate based on check type and updated clinical notes/charges
+  // Extract any clinical addendum appended to the record
+  const addendumMatch = currentNoteText.match(/\[Physician Clinical Addendum[^\]]*\]([\s\S]*)$/i);
+  const addendumText = addendumMatch ? addendumMatch[1].trim() : '';
+
   if (check.includes('icu') || check.includes('justification')) {
-    // Check if clinical justification has been added
-    const lower = currentNoteText.toLowerCase();
-    if (
-      lower.includes('justification') ||
-      lower.includes('acute hemodynamic') ||
-      lower.includes('unstable') ||
-      lower.includes('ventilat') ||
-      lower.includes('arterial line') ||
-      lower.includes('inotropic') ||
-      lower.includes('step-down') ||
-      lower.includes('critically ill') ||
-      lower.includes('addendum')
-    ) {
+    // Check if clinical justification addendum has been appended
+    if (addendumText && addendumText.length > 5) {
       resolved = true;
-      newEvidenceQuote = currentNoteText.slice(-150);
+      newEvidenceQuote = addendumText.slice(0, 160);
     }
   } else if (check.includes('diagnosis') || check.includes('support')) {
-    // Check if diagnosis was updated to K21.9 or if doctor confirmed diagnosis
-    const lower = currentNoteText.toLowerCase();
-    if (lower.includes('k21.9') || lower.includes('addendum') || lower.includes('confirmed diagnosis') || lower.includes('gerd')) {
+    // Check if diagnosis confirmation or addendum was appended
+    if (addendumText && addendumText.length > 5) {
       resolved = true;
-      newEvidenceQuote = currentNoteText.slice(-150);
+      newEvidenceQuote = addendumText.slice(0, 160);
     }
-  } else if (check.includes('room_rent') || check.includes('sublimit')) {
-    resolved = true;
-    newEvidenceQuote = 'Room rent adjusted to admissible standard tariff under Clause 1.1.';
-  } else if (check.includes('duplicate')) {
-    resolved = true;
-    newEvidenceQuote = 'Duplicate itemized line item reversed from billing ledger.';
-  } else if (check.includes('exclusion')) {
-    resolved = true;
-    newEvidenceQuote = 'Exclusion clearance or post-traumatic reconstruction documentation attached.';
+  } else if (check.includes('room_rent') || check.includes('sublimit') || check.includes('duplicate') || check.includes('exclusion')) {
+    if (addendumText && addendumText.length > 5) {
+      resolved = true;
+      newEvidenceQuote = addendumText.slice(0, 160);
+    }
   } else {
-    // Generic check
-    resolved = true;
-    newEvidenceQuote = currentNoteText.slice(-100);
+    if (addendumText && addendumText.length > 5) {
+      resolved = true;
+      newEvidenceQuote = addendumText.slice(0, 160);
+    }
   }
 
   if (resolved) {
     task.status = 'completed';
     if (!task.note) task.note = [];
     task.note.push({
-      text: `[Re-check Passed] Issue resolved. Verified evidence: "${newEvidenceQuote.trim()}"`,
+      text: `[Re-check Passed] Issue resolved. Verified evidence from record: "${newEvidenceQuote.trim()}"`,
       time: new Date().toISOString(),
       authorString: 'ClaimSure Re-check Agent',
     });
     task.output = [
       {
         type: { text: 'recheck_resolution' },
-        valueString: 'Verified resolved against updated clinical notes',
+        valueString: 'Verified resolved against clinical note addendum in record',
       },
     ];
     await source.update(task);
@@ -103,6 +91,6 @@ export async function recheckTask(taskId: string): Promise<{ task: Task; resolve
     task,
     resolved,
     gate,
-    message: resolved ? 'Re-check passed: Task marked completed' : 'Re-check failed: Condition still unresolved',
+    message: resolved ? 'Re-check passed: Verified resolved against clinical record' : 'Re-check failed: No documented clinical addendum found in record',
   };
 }

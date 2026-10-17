@@ -1,4 +1,4 @@
-export type ReadinessGate = 'Blocked' | 'Needs review' | 'Ready';
+export type ReadinessGate = 'Blocked' | 'Needs review' | 'Ready' | 'Not reviewed';
 export type UserRole = 'billing' | 'doctor';
 
 export interface EncounterSummary {

@@ -24,7 +24,7 @@ export function isGeminiConfigured(): { configured: boolean; reason?: string } {
 export async function runReviewAgent(
   encounterId: string,
   onEvent: (event: AgentProgressEvent) => void
-): Promise<{ tasks: Task[]; gate: 'Blocked' | 'Needs review' | 'Ready' }> {
+): Promise<{ tasks: Task[]; gate: 'Blocked' | 'Needs review' | 'Ready' | 'Not reviewed' }> {
   const configCheck = isGeminiConfigured();
   if (!configCheck.configured) {
     throw new Error(configCheck.reason || 'Gemini not configured: run gcloud auth application-default login');
@@ -136,13 +136,17 @@ export async function runReviewAgent(
 Your role: Review Encounter ${encounterId} against clinical documentation and Navjeevan Demo TPA / Indian Health Insurance policy rules.
 
 SYSTEM RULES:
-1. Never invent facts, codes, amounts, or policy clauses.
+1. NEVER INVENT OR FABRICATE CLINICAL FACTS:
+   - A suggested fix of type "doctor_note" must ONLY restate facts already present verbatim in the clinical record.
+   - NEVER invent clinical values, vitals, SpO2 percentages (e.g. 88%), diagnoses, symptoms (e.g. bronchospasm, hypoxia), or clinical complications that do not appear verbatim in the source notes.
+   - When the clinical record does not support a charge (e.g. ICU days billed with stable vitals and no documented instability or complications):
+     The fix must say so plainly: either the attending doctor adds a clinical justification ONLY IF a real clinical reason existed and was not documented (leave a blank for the doctor to fill with no invented content, e.g. "Attending Physician Addendum: Clinical justification for ICU monitoring: [Document clinical reason: ________]. Otherwise, billing must reclassify days to ward rate."), OR billing reclassifies the days to ward rate.
+   - Any doctor_note draft containing clinical values or conditions (vitals, SpO2, diagnoses, events) that do not appear in the encounter's source text will be automatically REJECTED and logged by the verification code.
 2. Every comment must quote its source text VERBATIM in evidence.quote.
-3. A drafted doctor note may only restate facts already present in the clinical record.
-4. If uncertain, return a low-severity comment with check "needs_review".
-5. Plan first: Provide a structured checklist of checks to execute.
-6. Then ACT by calling the server-side tools (deterministic TypeScript) to inspect notes, policy, charges, and diagnosis codes.
-7. Finally OUTPUT: A JSON array of comments matching the schema:
+3. If uncertain, return a low-severity comment with check "needs_review".
+4. Plan first: Provide a structured checklist of checks to execute.
+5. Then ACT by calling the server-side tools (deterministic TypeScript) to inspect notes, policy, charges, and diagnosis codes.
+6. Finally OUTPUT: A JSON array of comments matching the schema:
 [
   {
     "check": "string identifying the issue (e.g. icu_justification, diagnosis_support, room_rent_sublimit, policy_exclusion, duplicate_charge, clean)",
@@ -156,7 +160,7 @@ SYSTEM RULES:
     },
     "suggested_fix": {
       "type": "code_change" | "doctor_note" | "document_request" | "charge_correction",
-      "draft": "actionable draft fix or addendum note"
+      "draft": "actionable draft fix or addendum note (remember: never invent facts or vitals; leave a blank for undocumented reasons)"
     }
   }
 ]
@@ -345,6 +349,32 @@ If the claim is clean with zero discrepancies, output an empty array [] or a low
     createdTasks.push(saved);
   }
 
+  // If no issue tasks were created (e.g. clean encounter), record a completed audit task
+  // so the encounter transitions from "Not reviewed" to "Ready"
+  if (createdTasks.length === 0) {
+    const cleanTask: Task = {
+      resourceType: 'Task',
+      id: 'task-' + Math.random().toString(36).substring(2, 9),
+      intent: 'proposal',
+      status: 'completed',
+      for: { reference: `Patient/${patientRef || 'unknown'}` },
+      encounter: { reference: `Encounter/${encounterId}` },
+      owner: { display: 'ClaimSure Agent' },
+      code: { text: 'clean' },
+      businessStatus: { text: 'low' },
+      description: 'Claim readiness audit complete. All charges, notes, and policy limits verified.',
+      note: [
+        {
+          text: 'Automated claim-readiness audit completed with no discrepancies.',
+          time: new Date().toISOString(),
+          authorString: 'ClaimSure Agent (Verified)',
+        },
+      ],
+    };
+    const saved = (await source.create(cleanTask)) as Task;
+    createdTasks.push(saved);
+  }
+
   onEvent({ stage: 'tasks_saved', data: { count: createdTasks.length, tasks: createdTasks } });
 
   // Step 5: GATE calculation
@@ -355,8 +385,16 @@ If the claim is clean with zero discrepancies, output an empty array [] or a low
   return { tasks: createdTasks, gate };
 }
 
-export function calculateGate(tasks: Task[]): 'Blocked' | 'Needs review' | 'Ready' {
+export function calculateGate(tasks: Task[]): 'Blocked' | 'Needs review' | 'Ready' | 'Not reviewed' {
+  if (!tasks || tasks.length === 0) {
+    return 'Not reviewed';
+  }
+
   const openTasks = tasks.filter(t => t.status === 'requested' || t.status === 'in-progress' || t.status === 'ready');
+  if (openTasks.length === 0) {
+    return 'Ready';
+  }
+
   const hasHigh = openTasks.some(t => t.businessStatus?.text?.toLowerCase() === 'high');
   if (hasHigh) return 'Blocked';
 

@@ -30,6 +30,13 @@ export const EncounterTable: React.FC<EncounterTableProps> = ({
 
   const getGateBadge = (gate: ReadinessGate) => {
     switch (gate) {
+      case 'Not reviewed':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 border border-slate-300">
+            <Clock className="w-3.5 h-3.5 text-slate-500" />
+            Not reviewed
+          </span>
+        );
       case 'Blocked':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-red-50 text-red-700 border border-red-200">
@@ -73,7 +80,7 @@ export const EncounterTable: React.FC<EncounterTableProps> = ({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg self-start sm:self-auto overflow-x-auto">
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
@@ -83,6 +90,16 @@ export const EncounterTable: React.FC<EncounterTableProps> = ({
             }`}
           >
             All Encounters ({encounters.length})
+          </button>
+          <button
+            onClick={() => setFilter('Not reviewed')}
+            className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
+              filter === 'Not reviewed'
+                ? 'bg-slate-700 text-white shadow-xs'
+                : 'text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            Not Reviewed ({countByGate('Not reviewed')})
           </button>
           <button
             onClick={() => setFilter('Blocked')}

@@ -280,6 +280,12 @@ export const ReviewDesk: React.FC<ReviewDeskProps> = ({
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-slate-900 font-display">{patientName}</h1>
             {/* Gate Badge */}
+            {data.gate === 'Not reviewed' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-700 border border-slate-300">
+                <Clock className="w-3.5 h-3.5 text-slate-500" />
+                NOT REVIEWED
+              </span>
+            )}
             {data.gate === 'Blocked' && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-md bg-red-100 text-red-800 border border-red-300">
                 <AlertOctagon className="w-3.5 h-3.5" />
@@ -642,13 +648,23 @@ export const ReviewDesk: React.FC<ReviewDeskProps> = ({
             </div>
 
             {data.tasks.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-xl border border-slate-200 shadow-xs">
-                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-slate-900">No Open Readiness Issues</h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                  Encounter record conforms to hospital billing policies and clinical documentation rules. Ready for FHIR Claim generation.
-                </p>
-              </div>
+              data.gate === 'Not reviewed' ? (
+                <div className="p-8 text-center bg-white rounded-xl border border-slate-200 shadow-xs">
+                  <Clock className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                  <h4 className="font-semibold text-slate-900">Encounter Not Reviewed</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                    No audit tasks generated yet. Run the ClaimSure Readiness Review agent above to evaluate clinical documentation and policy rules.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-white rounded-xl border border-slate-200 shadow-xs">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
+                  <h4 className="font-semibold text-slate-900">No Open Readiness Issues</h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                    Encounter record conforms to hospital billing policies and clinical documentation rules. Ready for FHIR Claim generation.
+                  </p>
+                </div>
+              )
             ) : (
               data.tasks.map(task => {
                 const isDocRole = role === 'doctor';
