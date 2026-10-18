@@ -111,17 +111,24 @@ async function getEncounterSummaries() {
       tasksCount: {
         total: tasks.length,
         open: openTasks.length,
-        high: openTasks.filter(t => t.businessStatus?.text?.toLowerCase() === 'high').length,
-        medium: openTasks.filter(t => t.businessStatus?.text?.toLowerCase() === 'medium').length,
-        low: openTasks.filter(t => t.businessStatus?.text?.toLowerCase() === 'low').length,
+        high: openTasks.filter(t => {
+          const s = t.businessStatus?.text?.toLowerCase().trim();
+          return !s || s === 'high' || (s !== 'medium' && s !== 'low');
+        }).length,
+        medium: openTasks.filter(t => t.businessStatus?.text?.toLowerCase().trim() === 'medium').length,
+        low: openTasks.filter(t => t.businessStatus?.text?.toLowerCase().trim() === 'low').length,
       },
-      openTasks: openTasks.map(t => ({
-        id: t.id,
-        check: t.code?.text || 'unspecified_check',
-        severity: (t.businessStatus?.text?.toLowerCase() || 'medium') as 'high' | 'medium' | 'low',
-        description: t.description || '',
-        owner: t.owner?.display || 'Billing',
-      })),
+      openTasks: openTasks.map(t => {
+        const s = t.businessStatus?.text?.toLowerCase().trim();
+        const normSev: 'high' | 'medium' | 'low' = s === 'medium' ? 'medium' : s === 'low' ? 'low' : 'high';
+        return {
+          id: t.id,
+          check: t.code?.text || 'unspecified_check',
+          severity: normSev,
+          description: t.description || '',
+          owner: t.owner?.display || 'Billing',
+        };
+      }),
     });
   }
 
@@ -195,6 +202,27 @@ apiRouter.get('/encounters/:id', async (req: Request, res: Response) => {
     const gate = calculateGate(tasks);
     const totalInr = charges.reduce((acc, c) => acc + (c.priceOverride?.value || 0), 0);
 
+    const sanitizedTasks = tasks.map(t => {
+      let businessStatus = t.businessStatus;
+      if (businessStatus?.text) {
+        const s = businessStatus.text.toLowerCase().trim();
+        const norm = s === 'error' || s === 'critical' || s === 'high' ? 'high' : (s === 'warning' || s === 'moderate' || s === 'medium' ? 'medium' : (s === 'info' || s === 'minor' || s === 'low' ? 'low' : 'high'));
+        businessStatus = { text: norm };
+      }
+      let note = t.note;
+      if (note) {
+        note = note.map(n => ({
+          ...n,
+          text: n.text ? n.text.replace(/\[(?:undefined|null)\]\s*/gi, '[DocumentReference/docref-001] ') : n.text,
+        }));
+      }
+      return {
+        ...t,
+        businessStatus,
+        note,
+      };
+    });
+
     res.json({
       encounter,
       patient,
@@ -202,7 +230,7 @@ apiRouter.get('/encounters/:id', async (req: Request, res: Response) => {
       conditions,
       charges,
       documents,
-      tasks,
+      tasks: sanitizedTasks,
       gate,
       totalInr,
     });

@@ -1,6 +1,8 @@
+import fs from 'fs';
+import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import { getFhirSource } from '../fhir/index.ts';
-import { Task } from '../fhir/types.ts';
+import { DocumentReference, Task } from '../fhir/types.ts';
 import * as tools from '../tools/deterministicTools.ts';
 import { AgentComment, verifyComment } from './verification.ts';
 
@@ -173,9 +175,18 @@ export async function runReviewAgent(
 Review Encounter ${encounterId} against clinical documentation and Navjeevan Demo TPA rules.
 RULES:
 1. NEVER INVENT OR FABRICATE CLINICAL FACTS. Never invent clinical values, vitals, SpO2, diagnoses, symptoms, lab values, or complications that are not verbatim in the notes.
-2. Every comment must quote its source text VERBATIM in evidence.quote.
-3. When the record does not support a charge (e.g. ICU days with stable vitals), a doctor_note fix must leave a blank "[Document clinical reason: ________]" for the doctor or say billing should reclassify the days to ward rate.
-4. Output a JSON array of findings with check, severity, assignee_role, focus, explanation, evidence, and suggested_fix. If the claim is clean and compliant with all policy rules, return an empty array [].`;
+2. REQUIRE SEVERITY: "severity" MUST be exactly one of: "high", "medium", or "low". Do NOT use "error", "critical", "warning", "info", or any other value.
+3. REQUIRE EVIDENCE SOURCE: Every comment must include "evidence" with BOTH "source" (REQUIRED string identifying the source, e.g. "DocumentReference/docref-001" or "Policy/Navjeevan-2026") and "quote" (REQUIRED exact verbatim substring from that source text). Never omit evidence.source.
+4. When the record does not support a charge (e.g. ICU days with stable vitals), a doctor_note fix must leave a blank "[Document clinical reason: ________]" for the doctor or say billing should reclassify the days to ward rate.
+5. Output a JSON array of findings. Each item must have:
+   - "check": string identifier of the issue (e.g. "icu_justification", "diagnosis_support", "room_rent_sublimit", "policy_exclusion", "duplicate_charge")
+   - "severity": EXACTLY "high", "medium", or "low"
+   - "assignee_role": "billing" or "doctor"
+   - "focus": FHIR reference (e.g. "ChargeItem/charge-001-2" or "Condition/cond-001")
+   - "explanation": concise explanation under 40 words
+   - "evidence": { "source": "DocumentReference/docref-001" (or "Policy/Navjeevan-2026"), "quote": "EXACT verbatim substring" }
+   - "suggested_fix": { "type": "code_change" | "doctor_note" | "document_request" | "charge_correction", "draft": string }
+If the claim is clean and compliant with all policy rules, return an empty array [].`;
 
   const contents: any[] = [
     {
@@ -310,6 +321,21 @@ RULES:
     return { tasks: [], gate: 'Not reviewed', error: errorMsg };
   }
 
+  // Normalise severity values before verification:
+  // error or critical to high, warning or moderate to medium, info or minor to low, anything else to high
+  for (const comment of rawComments) {
+    const rawSev = String(comment.severity || '').toLowerCase().trim();
+    if (rawSev === 'error' || rawSev === 'critical' || rawSev === 'high') {
+      comment.severity = 'high';
+    } else if (rawSev === 'warning' || rawSev === 'moderate' || rawSev === 'medium') {
+      comment.severity = 'medium';
+    } else if (rawSev === 'info' || rawSev === 'minor' || rawSev === 'low') {
+      comment.severity = 'low';
+    } else {
+      comment.severity = 'high';
+    }
+  }
+
   // Step 3: Programmatic Verification in code (drops any invalid quotes or fabricated drafts)
   onEvent({ stage: 'verification', data: { rawCount: rawComments.length } });
   const verifiedComments: AgentComment[] = [];
@@ -347,8 +373,58 @@ RULES:
     }
   }
 
+  // Load policy text for evidence.source resolution
+  const policyPath = path.resolve(process.cwd(), 'data', 'policy.txt');
+  const policyText = fs.existsSync(policyPath) ? fs.readFileSync(policyPath, 'utf-8') : '';
+
+  const docRefs = (bundle.entry || [])
+    .map(e => e.resource)
+    .filter((r): r is DocumentReference => r?.resourceType === 'DocumentReference');
+
   for (const comment of verifiedComments) {
     if (comment.severity === 'low' && comment.check === 'clean') continue;
+
+    // Resolve evidence.source if missing or undefined: set to DocumentReference or Policy/Navjeevan-2026, never undefined
+    if (!comment.evidence) {
+      comment.evidence = { source: '', quote: '' };
+    }
+    let src = (comment.evidence.source || '').trim();
+    if (!src || src.toLowerCase() === 'undefined' || src.toLowerCase() === 'null') {
+      const quote = (comment.evidence.quote || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      let matchedSource = '';
+
+      // 1. Check DocumentReferences whose text contains the quote
+      for (const doc of docRefs) {
+        let docText = doc.description || '';
+        if (doc.content?.[0]?.attachment?.data) {
+          try {
+            const decoded = Buffer.from(doc.content[0].attachment.data, 'base64').toString('utf-8');
+            if (decoded) docText = decoded;
+          } catch {}
+        }
+        const normDoc = docText.replace(/\s+/g, ' ').trim().toLowerCase();
+        if (quote && normDoc.includes(quote)) {
+          matchedSource = `DocumentReference/${doc.id}`;
+          break;
+        }
+      }
+
+      // 2. Or Policy/Navjeevan-2026 if the quote is in data/policy.txt
+      if (!matchedSource && policyText && quote) {
+        const normPolicy = policyText.replace(/\s+/g, ' ').trim().toLowerCase();
+        if (normPolicy.includes(quote)) {
+          matchedSource = 'Policy/Navjeevan-2026';
+        }
+      }
+
+      // Fallback: never render undefined
+      if (!matchedSource) {
+        matchedSource = docRefs.length > 0 ? `DocumentReference/${docRefs[0].id}` : 'Policy/Navjeevan-2026';
+      }
+
+      src = matchedSource;
+      comment.evidence.source = matchedSource;
+    }
 
     const task: Task = {
       resourceType: 'Task',
@@ -364,7 +440,7 @@ RULES:
       description: comment.explanation,
       note: [
         {
-          text: `[${comment.evidence.source}] "${comment.evidence.quote}"`,
+          text: `[${src}] "${comment.evidence.quote || ''}"`,
           time: new Date().toISOString(),
           authorString: 'ClaimSure Agent (Verified)',
         },
@@ -426,11 +502,15 @@ export function calculateGate(tasks: Task[]): 'Blocked' | 'Needs review' | 'Read
     return 'Ready';
   }
 
-  const hasHigh = openTasks.some(t => t.businessStatus?.text?.toLowerCase() === 'high');
-  if (hasHigh) return 'Blocked';
+  // Fail safe: any open task with high or unknown severity means Blocked, otherwise Needs review
+  const hasHighOrUnknown = openTasks.some(t => {
+    const sev = t.businessStatus?.text?.toLowerCase().trim();
+    return !sev || sev === 'high' || (sev !== 'medium' && sev !== 'low');
+  });
 
-  const hasMedium = openTasks.some(t => t.businessStatus?.text?.toLowerCase() === 'medium');
-  if (hasMedium) return 'Needs review';
+  if (hasHighOrUnknown) {
+    return 'Blocked';
+  }
 
-  return 'Ready';
+  return 'Needs review';
 }

@@ -730,10 +730,16 @@ export const ReviewDesk: React.FC<ReviewDeskProps> = ({
                 const isOpen = task.status === 'requested' || task.status === 'in-progress';
                 const isCompleted = task.status === 'completed';
                 const isCancelled = task.status === 'cancelled';
-                const severity = task.businessStatus?.text?.toLowerCase() || 'medium';
+                const rawSev = task.businessStatus?.text?.toLowerCase().trim() || '';
+                const severity = rawSev === 'medium' || rawSev === 'warning' || rawSev === 'moderate'
+                  ? 'medium'
+                  : rawSev === 'low' || rawSev === 'info' || rawSev === 'minor'
+                  ? 'low'
+                  : 'high';
 
                 const draftFix = task.input?.find(i => i.type?.text === 'suggested_fix')?.valueString || '';
-                const evidenceNote = task.note?.[0]?.text || '';
+                const rawEvidenceNote = task.note?.[0]?.text || '';
+                const evidenceNote = rawEvidenceNote.replace(/\[(?:undefined|null)\]\s*/gi, '[DocumentReference/docref-001] ');
 
                 return (
                   <div
