@@ -532,7 +532,7 @@ export const ReviewDesk: React.FC<ReviewDeskProps> = ({
                 {/* Projected Deductions Breakdown */}
                 <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
                   <span className="font-bold text-slate-800 block text-xs">
-                    Projected TPA Line-Item Adjudication:
+                    Projected TPA Line-Item Adjudication (illustrative estimate):
                   </span>
 
                   <div className="space-y-1.5 text-[11px]">

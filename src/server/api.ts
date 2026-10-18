@@ -489,6 +489,14 @@ apiRouter.post('/recheck/:taskId', async (req: Request, res: Response) => {
 apiRouter.get('/export/:encounterId', async (req: Request, res: Response) => {
   try {
     const { encounterId } = req.params;
+    // Readiness gate is enforced server-side, not just in the UI
+    const source = getFhirSource();
+    const gateTasks = (await source.search('Task', { encounter: encounterId })) as Task[];
+    const gate = calculateGate(gateTasks);
+    if (gate !== 'Ready') {
+      res.status(409).json({ error: `Claim ${encounterId} is ${gate}. Only Ready claims can be exported.` });
+      return;
+    }
     const claim = await generateFhirClaim(encounterId);
     res.setHeader('Content-Type', 'application/fhir+json');
     res.setHeader('Content-Disposition', `attachment; filename="Claim_${encounterId}_institutional.json"`);
