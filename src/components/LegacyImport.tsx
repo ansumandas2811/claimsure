@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Database, ArrowRight, Check, RefreshCw, FileSpreadsheet, Code2 } from 'lucide-react';
 
 interface LegacyImportProps {
   onSuccess: () => void;
@@ -71,13 +70,13 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Database className="w-5 h-5 text-[#0B7A70]" />
+            <i className="fa-solid fa-database text-[#0B7A70] text-lg"></i>
             <h1 className="text-xl font-bold text-slate-900 font-display">
-              Legacy HIS Export Adapter
+              Legacy Hospital Information System (HIS) Adapter
             </h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Normalizes legacy hospital exports (messy date formats, free-text clinical diagnoses, and non-standard charge tables) into standard FHIR R4 transactions.
+            Normalizes legacy hospital flat exports (messy dates, free-text diagnoses, and unbundled charges) into compliant FHIR R4 transactions.
           </p>
         </div>
 
@@ -93,7 +92,7 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
             </>
           ) : (
             <>
-              <ArrowRight className="w-4 h-4" />
+              <i className="fa-solid fa-arrow-right"></i>
               <span>Write to Active FHIR Store</span>
             </>
           )}
@@ -102,13 +101,14 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
 
       {commitMessage && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
-          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <i className="fa-solid fa-circle-check text-emerald-600 shrink-0"></i>
           <span className="font-semibold">{commitMessage}</span>
         </div>
       )}
 
       {errorMessage && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 flex items-center gap-2">
+          <i className="fa-solid fa-triangle-exclamation text-red-600 shrink-0"></i>
           <span className="font-semibold">{errorMessage}</span>
         </div>
       )}
@@ -119,39 +119,39 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
         <div className="lg:col-span-6 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col h-[700px]">
           {/* Sub-tabs */}
           <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 pt-2">
-            <div className="flex items-center gap-2 text-xs font-medium">
+            <div className="flex items-center gap-2 text-xs font-semibold">
               <button
                 onClick={() => setActiveCsvTab('admissions')}
                 className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
                   activeCsvTab === 'admissions'
-                    ? 'border-[#0B7A70] text-[#0B7A70] font-semibold bg-white rounded-t-md'
+                    ? 'border-[#0B7A70] text-[#0B7A70] bg-white rounded-t-md'
                     : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                admissions.csv ({data.parsedRows.admissions.length})
+                <i className="fa-solid fa-file-csv"></i>
+                <span>admissions.csv ({data.parsedRows.admissions.length})</span>
               </button>
               <button
                 onClick={() => setActiveCsvTab('diagnoses')}
                 className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
                   activeCsvTab === 'diagnoses'
-                    ? 'border-[#0B7A70] text-[#0B7A70] font-semibold bg-white rounded-t-md'
+                    ? 'border-[#0B7A70] text-[#0B7A70] bg-white rounded-t-md'
                     : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                diagnoses.csv ({data.parsedRows.diagnoses.length})
+                <i className="fa-solid fa-file-csv"></i>
+                <span>diagnoses.csv ({data.parsedRows.diagnoses.length})</span>
               </button>
               <button
                 onClick={() => setActiveCsvTab('charges')}
                 className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition-colors ${
                   activeCsvTab === 'charges'
-                    ? 'border-[#0B7A70] text-[#0B7A70] font-semibold bg-white rounded-t-md'
+                    ? 'border-[#0B7A70] text-[#0B7A70] bg-white rounded-t-md'
                     : 'border-transparent text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                charges.csv ({data.parsedRows.charges.length})
+                <i className="fa-solid fa-file-csv"></i>
+                <span>charges.csv ({data.parsedRows.charges.length})</span>
               </button>
             </div>
             <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">Source: /data/legacy/</span>
@@ -229,7 +229,7 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
                       <td className="py-2 px-2.5 font-mono text-slate-500">{row.service_date}</td>
                       <td className="py-2 px-2.5 font-medium text-slate-900">{row.item_description}</td>
                       <td className="py-2 px-2 text-center font-mono">{row.quantity}</td>
-                      <td className="py-2 px-2.5 text-right font-mono font-semibold text-slate-800 tabular-nums">
+                      <td className="py-2 px-2.5 text-right font-mono font-bold text-slate-800 tabular-nums">
                         ₹{row.unit_price_inr}
                       </td>
                     </tr>
@@ -243,8 +243,8 @@ export const LegacyImport: React.FC<LegacyImportProps> = ({ onSuccess }) => {
         {/* Right: Resulting FHIR JSON (6 cols) */}
         <div className="lg:col-span-6 bg-slate-900 text-slate-200 rounded-xl border border-slate-800 shadow-xs overflow-hidden flex flex-col h-[700px]">
           <div className="flex items-center justify-between bg-slate-950 px-4 py-3 border-b border-slate-800">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-              <Code2 className="w-4 h-4 text-[#0B7A70]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+              <i className="fa-solid fa-code text-[#0B7A70]"></i>
               <span>Resulting FHIR R4 Transaction Bundle</span>
             </div>
             <span className="text-[11px] font-mono text-teal-400">

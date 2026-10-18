@@ -1,8 +1,22 @@
 import { getFhirSource } from '../fhir/index.ts';
 import { DocumentReference, Task } from '../fhir/types.ts';
-import { calculateGate } from './reviewAgent.ts';
+import { calculateGate, getGeminiClient, isGeminiConfigured } from './reviewAgent.ts';
 
-export async function recheckTask(taskId: string): Promise<{ task: Task; resolved: boolean; gate: string; message: string }> {
+export async function recheckTask(
+  taskId: string
+): Promise<{ task: Task; resolved: boolean; gate: string; message: string }> {
+  // Check if Gemini is configured
+  const geminiCheck = isGeminiConfigured();
+  if (!geminiCheck.configured) {
+    const reason = geminiCheck.reason || 'configuration missing';
+    throw new Error(`Re-check failed: Gemini unavailable (${reason}).`);
+  }
+
+  const clientInfo = getGeminiClient();
+  if (!clientInfo) {
+    throw new Error('Re-check failed: Gemini unavailable (client initialization failed).');
+  }
+
   const source = getFhirSource();
   const searchResults = await source.search('Task', { _id: taskId });
   if (searchResults.length === 0) {
@@ -34,50 +48,61 @@ export async function recheckTask(taskId: string): Promise<{ task: Task; resolve
     } catch {}
   }
 
-  const check = (task.code?.text || '').toLowerCase();
-  let resolved = false;
-  let newEvidenceQuote = '';
+  // Evaluate genuine clinical evidence resolution via Gemini
+  const systemInstruction = `You are ClaimSure's claim-readiness re-check agent for hospital billing teams and medical directors.
+Your job is to determine whether a flagged claim discrepancy has been genuinely resolved by newly documented clinical evidence or doctor addendum in the patient record.
+RULES:
+1. NEVER INVENT OR ACCEPT FABRICATED FACTS. If a physician addendum is empty, contains placeholder brackets like "[Document clinical reason: ________]", or fails to clinically justify the billed service, set resolved to false.
+2. If the updated record contains genuine documentation resolving the issue, set resolved to true and extract the exact VERBATIM quote from the record in evidenceQuote.
+3. Output a single JSON object with { "resolved": boolean, "evidenceQuote": string, "explanation": string }.`;
 
-  // Extract any clinical addendum appended to the record
-  const addendumMatch = currentNoteText.match(/\[Physician Clinical Addendum[^\]]*\]([\s\S]*)$/i);
-  const addendumText = addendumMatch ? addendumMatch[1].trim() : '';
+  const promptText = `Task check: ${task.code?.text || 'clinical_audit'}
+Severity: ${task.businessStatus?.text || 'medium'}
+Flagged issue: ${task.description || ''}
+Original evidence: ${task.note?.[0]?.text || 'N/A'}
+Suggested fix: ${task.input?.find(i => i.type?.text === 'suggested_fix')?.valueString || 'N/A'}
 
-  if (check.includes('icu') || check.includes('justification')) {
-    // Check if clinical justification addendum has been appended
-    if (addendumText && addendumText.length > 5) {
-      resolved = true;
-      newEvidenceQuote = addendumText.slice(0, 160);
+Current Clinical Documentation:
+"""
+${currentNoteText}
+"""
+
+Evaluate whether the updated clinical record resolves this task. Return JSON only.`;
+
+  let parsed: { resolved: boolean; evidenceQuote: string; explanation: string };
+  try {
+    const res = await clientInfo.ai.models.generateContent({
+      model: clientInfo.modelName,
+      contents: [{ role: 'user', parts: [{ text: promptText }] }],
+      config: {
+        systemInstruction,
+        temperature: 0.1,
+      },
+    });
+
+    const text = res.text || '';
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) {
+      throw new Error('Response did not contain a valid JSON object');
     }
-  } else if (check.includes('diagnosis') || check.includes('support')) {
-    // Check if diagnosis confirmation or addendum was appended
-    if (addendumText && addendumText.length > 5) {
-      resolved = true;
-      newEvidenceQuote = addendumText.slice(0, 160);
-    }
-  } else if (check.includes('room_rent') || check.includes('sublimit') || check.includes('duplicate') || check.includes('exclusion')) {
-    if (addendumText && addendumText.length > 5) {
-      resolved = true;
-      newEvidenceQuote = addendumText.slice(0, 160);
-    }
-  } else {
-    if (addendumText && addendumText.length > 5) {
-      resolved = true;
-      newEvidenceQuote = addendumText.slice(0, 160);
-    }
+    parsed = JSON.parse(match[0]);
+  } catch (err: any) {
+    const reason = err?.message || String(err);
+    throw new Error(`Re-check failed: Gemini unavailable (${reason}).`);
   }
 
-  if (resolved) {
+  if (parsed.resolved) {
     task.status = 'completed';
     if (!task.note) task.note = [];
     task.note.push({
-      text: `[Re-check Passed] Issue resolved. Verified evidence from record: "${newEvidenceQuote.trim()}"`,
+      text: `[Re-check Passed] Issue verified resolved against clinical documentation: "${(parsed.evidenceQuote || '').trim()}"`,
       time: new Date().toISOString(),
-      authorString: 'ClaimSure Re-check Agent',
+      authorString: 'ClaimSure Re-check Agent (Gemini Verified)',
     });
     task.output = [
       {
         type: { text: 'recheck_resolution' },
-        valueString: 'Verified resolved against clinical note addendum in record',
+        valueString: parsed.explanation || 'Verified resolved against clinical note addendum in record',
       },
     ];
     await source.update(task);
@@ -89,8 +114,8 @@ export async function recheckTask(taskId: string): Promise<{ task: Task; resolve
 
   return {
     task,
-    resolved,
+    resolved: parsed.resolved,
     gate,
-    message: resolved ? 'Re-check passed: Verified resolved against clinical record' : 'Re-check failed: No documented clinical addendum found in record',
+    message: parsed.explanation || (parsed.resolved ? 'Re-check passed: Verified resolved against clinical record' : 'Re-check failed: Insufficient documentation in record'),
   };
 }

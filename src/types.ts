@@ -21,6 +21,13 @@ export interface EncounterSummary {
     medium: number;
     low: number;
   };
+  openTasks?: Array<{
+    id: string;
+    check: string;
+    severity: 'high' | 'medium' | 'low';
+    description?: string;
+    owner?: string;
+  }>;
 }
 
 export interface TaskItem {

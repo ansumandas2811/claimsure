@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, Check, AlertCircle, ArrowRight, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { SystemStatus } from '../types.ts';
 
 interface DocumentScannerProps {
@@ -17,8 +16,8 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate a realistic base64 synthetic invoice image dynamically using an HTML5 Canvas!
-  const loadSyntheticBillPreset = (patientName: string, billType: string) => {
+  // Generate a realistic base64 synthetic invoice image dynamically using an HTML5 Canvas
+  const loadSyntheticBillPreset = (patientName: string) => {
     const canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 1000;
@@ -64,7 +63,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
     ctx.font = '13px sans-serif';
     ctx.fillText(`Patient Name: ${patientName}`, 50, 230);
     ctx.fillText('MRN: IN-METRO-98442', 50, 255);
-    ctx.fillText('Gender: Male', 50, 280);
+    ctx.fillText('Gender: Female', 50, 280);
     ctx.fillText('Admit Date: 2026-03-18', 420, 230);
     ctx.fillText('Discharge Date: 2026-03-21', 420, 255);
     ctx.fillText('TPA: Navjeevan Demo TPA (Kavach Demo General Insurance)', 420, 280);
@@ -101,7 +100,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
     let y = 435;
     ctx.fillStyle = '#1e293b';
     ctx.font = '12px monospace';
-    items.forEach((row, i) => {
+    items.forEach((row) => {
       ctx.fillText(row[0], 65, y);
       ctx.font = '12px sans-serif';
       ctx.fillText(row[1], 110, y);
@@ -168,11 +167,6 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
 
   const handleExtract = async () => {
     if (!fileBase64) return;
-    if (!systemStatus?.geminiConfigured) {
-      setError(systemStatus?.geminiReason || 'Gemini not configured: run gcloud auth application-default login');
-      return;
-    }
-
     setIsExtracting(true);
     setError(null);
     try {
@@ -221,13 +215,13 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <UploadCloud className="w-5 h-5 text-[#0B7A70]" />
+            <i className="fa-solid fa-file-invoice text-[#0B7A70] text-lg"></i>
             <h1 className="text-xl font-bold text-slate-900 font-display">
               Scanned Clinical Documents & Invoice Ingestion
             </h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Multimodal Gemini extraction (EXTRACT_MODEL) parses scanned PDFs and invoice photographs into structured FHIR R4 encounters.
+            Multimodal document parser ingests scanned bills and discharge summaries into structured FHIR R4 encounters.
           </p>
         </div>
       </div>
@@ -235,15 +229,16 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
       {/* Preset Quick Load */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="text-xs text-slate-700">
-          <span className="font-semibold block text-slate-900">Need a sample document to test?</span>
-          <span>Click a synthetic Indian hospital invoice preset to load an authentic sample invoice into memory.</span>
+          <span className="font-bold block text-slate-900">Need a sample hospital bill to test?</span>
+          <span>Click the button to load an authentic synthetic Indian hospital invoice into memory.</span>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => loadSyntheticBillPreset('Neelam Sengupta', 'Cholecystectomy')}
-            className="px-3 py-1.5 text-xs font-semibold text-[#0B7A70] bg-white border border-[#0B7A70]/40 rounded-lg hover:bg-teal-50 transition-colors shadow-xs"
+            onClick={() => loadSyntheticBillPreset('Neelam Sengupta')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#0B7A70] bg-white border border-[#0B7A70]/40 rounded-lg hover:bg-teal-50 transition-colors shadow-xs cursor-pointer"
           >
-            Load Sample Inpatient Bill
+            <i className="fa-solid fa-file-arrow-up"></i>
+            <span>Load Sample Inpatient Bill</span>
           </button>
         </div>
       </div>
@@ -254,9 +249,9 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
         <div className="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
           <h2 className="text-sm font-bold text-slate-900 font-display">1. Select or Upload Document</h2>
 
-          <label className="border-2 border-dashed border-slate-300 hover:border-[#0B7A70] rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-50/50">
-            <ImageIcon className="w-8 h-8 text-slate-400 mb-2" />
-            <span className="text-xs font-semibold text-slate-700">Click to upload bill image or PDF</span>
+          <label className="border-2 border-dashed border-slate-300 hover:border-[#0B7A70] rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-50">
+            <i className="fa-solid fa-image text-slate-400 text-3xl mb-2"></i>
+            <span className="text-xs font-bold text-slate-700">Click to upload bill image or document</span>
             <span className="text-[11px] text-slate-400 mt-1">Supports PNG, JPG, or PDF</span>
             <input
               type="file"
@@ -269,7 +264,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
           {fileName && (
             <div className="p-3 bg-slate-100 rounded-lg text-xs flex items-center justify-between">
               <div className="flex items-center gap-2 truncate">
-                <FileText className="w-4 h-4 text-[#0B7A70] shrink-0" />
+                <i className="fa-solid fa-file-lines text-[#0B7A70] shrink-0"></i>
                 <span className="font-medium text-slate-800 truncate">{fileName}</span>
               </div>
               <span className="text-[10px] uppercase font-mono text-slate-500">{mimeType.split('/')[1]}</span>
@@ -288,18 +283,18 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
 
               <button
                 onClick={handleExtract}
-                disabled={isExtracting || !systemStatus?.geminiConfigured}
+                disabled={isExtracting}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-xs font-bold text-white bg-[#0B7A70] hover:bg-[#085a53] rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isExtracting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Extracting Structured FHIR with Gemini...</span>
+                    <span>Extracting Structured FHIR Data...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Extract FHIR Data Multimodally</span>
+                    <i className="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Extract Structured FHIR Data</span>
                   </>
                 )}
               </button>
@@ -308,7 +303,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <i className="fa-solid fa-triangle-exclamation text-red-600 shrink-0 mt-0.5"></i>
               <span>{error}</span>
             </div>
           )}
@@ -320,14 +315,15 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
             <h2 className="text-sm font-bold text-slate-900 font-display">2. Structured Review & Confirmation</h2>
             {extractedResult && (
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                Extracted via {systemStatus?.env.extractModel || 'Gemini'}
+                Extraction Verified
               </span>
             )}
           </div>
 
           {!extractedResult ? (
             <div className="py-24 text-center text-slate-400 text-xs">
-              Upload or select a synthetic bill on the left, then click "Extract FHIR Data" to review the extracted fields before committing.
+              <i className="fa-solid fa-file-invoice text-3xl text-slate-300 block mb-2"></i>
+              <span>Upload or select a sample bill on the left, then click "Extract Structured FHIR Data" to review fields.</span>
             </div>
           ) : (
             <div className="space-y-4">
@@ -358,12 +354,12 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
 
                 {/* Extracted Charges */}
                 <div className="pt-2 border-t border-slate-200">
-                  <span className="font-semibold text-slate-700 block mb-1.5">Extracted Itemized Charges:</span>
+                  <span className="font-bold text-slate-700 block mb-1.5">Extracted Itemized Charges:</span>
                   <div className="space-y-1">
                     {extractedResult.rawJson.charges?.map((c: any, i: number) => (
                       <div key={i} className="flex items-center justify-between text-[11px] py-1 border-b border-slate-100 last:border-0">
-                        <span className="text-slate-800">{c.description}</span>
-                        <span className="font-mono font-semibold text-slate-900 tabular-nums">
+                        <span className="text-slate-800 font-medium">{c.description}</span>
+                        <span className="font-mono font-bold text-slate-900 tabular-nums">
                           ₹{c.totalAmountInr?.toLocaleString('en-IN')}
                         </span>
                       </div>
@@ -375,7 +371,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
               {/* Confirmation Action */}
               <div className="flex items-center justify-between pt-2">
                 <span className="text-xs text-slate-500">
-                  Ready to add to live hospital worklist.
+                  Ready to add to active hospital worklist.
                 </span>
 
                 <button
@@ -391,13 +387,13 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({ systemStatus, 
                     'Saving Encounter...'
                   ) : saveSuccess ? (
                     <>
-                      <Check className="w-4 h-4" />
+                      <i className="fa-solid fa-check"></i>
                       <span>Saved to FHIR Store!</span>
                     </>
                   ) : (
                     <>
-                      <Check className="w-4 h-4" />
-                      <span>Confirm & Save to Worklist</span>
+                      <i className="fa-solid fa-check"></i>
+                      <span>Confirm & Add to Worklist</span>
                     </>
                   )}
                 </button>

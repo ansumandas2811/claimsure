@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 @layer base {
   :root {
@@ -18,9 +19,47 @@
     color: #1e293b;
     background-color: #f8fafc;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+}
+
+/* Custom sleek scrollbar that never pushes layout */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Smooth horizontal scroll on hover for overflowing text */
+.hover-scroll-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+.hover-scroll-inner {
+  display: inline-block;
+  white-space: nowrap;
+  transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.hover-scroll-container:hover .hover-scroll-inner.is-overflowing {
+  transform: translateX(var(--scroll-distance, -40px));
 }

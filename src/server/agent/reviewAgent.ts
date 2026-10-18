@@ -1,5 +1,4 @@
 import { GoogleGenAI, Type } from '@google/genai';
-import { Response } from 'express';
 import { getFhirSource } from '../fhir/index.ts';
 import { Task } from '../fhir/types.ts';
 import * as tools from '../tools/deterministicTools.ts';
@@ -11,47 +10,97 @@ export interface AgentProgressEvent {
 }
 
 export function isGeminiConfigured(): { configured: boolean; reason?: string } {
-  const project = process.env.GOOGLE_CLOUD_PROJECT;
-  if (!project) {
+  if (process.env.GEMINI_API_KEY) {
+    return { configured: true };
+  }
+  if (process.env.GOOGLE_CLOUD_PROJECT) {
+    return { configured: true };
+  }
+  return {
+    configured: false,
+    reason: 'Neither GEMINI_API_KEY nor GOOGLE_CLOUD_PROJECT environment variable is configured',
+  };
+}
+
+export function getGeminiClient(): { ai: GoogleGenAI; modelName: string } | null {
+  const modelName = process.env.REVIEW_MODEL || 'gemini-3.8-flash';
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (apiKey) {
     return {
-      configured: false,
-      reason: 'GOOGLE_CLOUD_PROJECT environment variable is not set. Run `gcloud auth application-default login` and set GOOGLE_CLOUD_PROJECT.',
+      ai: new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      }),
+      modelName,
     };
   }
-  return { configured: true };
+
+  const project = process.env.GOOGLE_CLOUD_PROJECT;
+  if (project) {
+    const location = process.env.GEMINI_LOCATION || 'global';
+    return {
+      ai: new GoogleGenAI({
+        vertexai: true,
+        project,
+        location,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      }),
+      modelName,
+    };
+  }
+
+  return null;
 }
+
+const toolHandlers: Record<string, (args: any) => Promise<any>> = {
+  fhir_search: tools.fhir_search,
+  get_note_text: tools.get_note_text,
+  get_policy_clauses: tools.get_policy_clauses,
+  lookup_diagnosis_code: tools.lookup_diagnosis_code,
+  find_duplicate_charges: tools.find_duplicate_charges,
+  check_charge_totals: tools.check_charge_totals,
+  check_required_documents: tools.check_required_documents,
+};
 
 export async function runReviewAgent(
   encounterId: string,
   onEvent: (event: AgentProgressEvent) => void
-): Promise<{ tasks: Task[]; gate: 'Blocked' | 'Needs review' | 'Ready' | 'Not reviewed' }> {
-  const configCheck = isGeminiConfigured();
-  if (!configCheck.configured) {
-    throw new Error(configCheck.reason || 'Gemini not configured: run gcloud auth application-default login');
+): Promise<{ tasks: Task[]; gate: 'Blocked' | 'Needs review' | 'Ready' | 'Not reviewed'; error?: string }> {
+  // Step 0: Ensure Gemini is configured
+  const geminiCheck = isGeminiConfigured();
+  if (!geminiCheck.configured) {
+    const reason = geminiCheck.reason || 'configuration missing';
+    const errorMsg = `Not reviewed: Gemini unavailable (${reason}). No findings were created.`;
+    console.error(`[reviewAgent] ${errorMsg}`);
+    onEvent({ stage: 'error', data: { error: errorMsg } });
+    return { tasks: [], gate: 'Not reviewed', error: errorMsg };
   }
 
-  const project = process.env.GOOGLE_CLOUD_PROJECT;
-  const location = process.env.GEMINI_LOCATION || 'global';
-  const modelName = process.env.REVIEW_MODEL || 'gemini-2.5-pro';
-
-  const ai = new GoogleGenAI({
-    vertexai: true,
-    project,
-    location,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      },
-    },
-  });
+  const clientInfo = getGeminiClient();
+  if (!clientInfo) {
+    const errorMsg = 'Not reviewed: Gemini unavailable (client initialization failed). No findings were created.';
+    console.error(`[reviewAgent] ${errorMsg}`);
+    onEvent({ stage: 'error', data: { error: errorMsg } });
+    return { tasks: [], gate: 'Not reviewed', error: errorMsg };
+  }
 
   const source = getFhirSource();
   const bundle = await source.getEncounterBundle(encounterId);
   if (!bundle) {
-    throw new Error(`Encounter ${encounterId} not found`);
+    const errorMsg = `Not reviewed: Encounter ${encounterId} not found in FHIR store. No findings were created.`;
+    console.error(`[reviewAgent] ${errorMsg}`);
+    onEvent({ stage: 'error', data: { error: errorMsg } });
+    return { tasks: [], gate: 'Not reviewed', error: errorMsg };
   }
 
-  // Define Function Declarations
   const toolDeclarations = [
     {
       name: 'fhir_search',
@@ -59,63 +108,53 @@ export async function runReviewAgent(
       parameters: {
         type: Type.OBJECT,
         properties: {
-          resourceType: { type: Type.STRING, description: 'FHIR Resource type like ChargeItem, Condition, Coverage' },
-          params: { type: Type.OBJECT, description: 'Search parameters key-value object' },
+          resourceType: { type: Type.STRING, description: 'FHIR Resource type' },
+          params: { type: Type.OBJECT, description: 'Search parameters' },
         },
         required: ['resourceType'],
       },
     },
     {
       name: 'get_note_text',
-      description: 'Retrieve full verbatim clinical discharge summary note text for this encounter',
+      description: 'Retrieve verbatim clinical discharge summary note text',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          encounterId: { type: Type.STRING, description: 'Encounter ID (e.g. ENC-001)' },
-        },
+        properties: { encounterId: { type: Type.STRING } },
         required: ['encounterId'],
       },
     },
     {
       name: 'get_policy_clauses',
-      description: 'Retrieve policy clauses and sub-limits from Indian Health Insurance policy (room rent, ICU, exclusions, duplicates, documentation)',
+      description: 'Retrieve policy clauses from Navjeevan Demo TPA',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          topic: { type: Type.STRING, description: 'Topic keyword e.g. "room rent", "icu", "exclusion", "duplicate", "documentation", or "all"' },
-        },
+        properties: { topic: { type: Type.STRING } },
       },
     },
     {
       name: 'lookup_diagnosis_code',
-      description: 'Look up ICD-10 diagnosis code definition, billability and clinical criteria',
+      description: 'Look up ICD-10 diagnosis code definition',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          code: { type: Type.STRING, description: 'ICD-10 code string e.g. "I21.9", "K80.20", "Z41.1"' },
-        },
+        properties: { code: { type: Type.STRING } },
         required: ['code'],
       },
     },
     {
       name: 'find_duplicate_charges',
-      description: 'Analyze all ChargeItems for duplicate codes or duplicate timestamps',
+      description: 'Analyze all ChargeItems for duplicate codes or timestamps',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          encounterId: { type: Type.STRING, description: 'Encounter ID' },
-        },
+        properties: { encounterId: { type: Type.STRING } },
         required: ['encounterId'],
       },
     },
     {
       name: 'check_charge_totals',
-      description: 'Inspect itemized charges, room charge daily rates, and totals in INR',
+      description: 'Inspect itemized charges, room charge daily rates, and totals',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          encounterId: { type: Type.STRING, description: 'Encounter ID' },
-        },
+        properties: { encounterId: { type: Type.STRING } },
         required: ['encounterId'],
       },
     },
@@ -124,161 +163,154 @@ export async function runReviewAgent(
       description: 'Verify presence of mandatory claim submission documents',
       parameters: {
         type: Type.OBJECT,
-        properties: {
-          encounterId: { type: Type.STRING, description: 'Encounter ID' },
-        },
+        properties: { encounterId: { type: Type.STRING } },
         required: ['encounterId'],
       },
     },
   ];
 
   const systemInstruction = `You are ClaimSure's autonomous hospital claim-readiness review agent for hospital billing teams and medical directors.
-Your role: Review Encounter ${encounterId} against clinical documentation and Navjeevan Demo TPA / Indian Health Insurance policy rules.
-
-SYSTEM RULES:
-1. NEVER INVENT OR FABRICATE CLINICAL FACTS:
-   - A suggested fix of type "doctor_note" must ONLY restate facts already present verbatim in the clinical record.
-   - NEVER invent clinical values, vitals, SpO2 percentages (e.g. 88%), diagnoses, symptoms (e.g. bronchospasm, hypoxia), or clinical complications that do not appear verbatim in the source notes.
-   - When the clinical record does not support a charge (e.g. ICU days billed with stable vitals and no documented instability or complications):
-     The fix must say so plainly: either the attending doctor adds a clinical justification ONLY IF a real clinical reason existed and was not documented (leave a blank for the doctor to fill with no invented content, e.g. "Attending Physician Addendum: Clinical justification for ICU monitoring: [Document clinical reason: ________]. Otherwise, billing must reclassify days to ward rate."), OR billing reclassifies the days to ward rate.
-   - Any doctor_note draft containing clinical values or conditions (vitals, SpO2, diagnoses, events) that do not appear in the encounter's source text will be automatically REJECTED and logged by the verification code.
+Review Encounter ${encounterId} against clinical documentation and Navjeevan Demo TPA rules.
+RULES:
+1. NEVER INVENT OR FABRICATE CLINICAL FACTS. Never invent clinical values, vitals, SpO2, diagnoses, symptoms, lab values, or complications that are not verbatim in the notes.
 2. Every comment must quote its source text VERBATIM in evidence.quote.
-3. If uncertain, return a low-severity comment with check "needs_review".
-4. Plan first: Provide a structured checklist of checks to execute.
-5. Then ACT by calling the server-side tools (deterministic TypeScript) to inspect notes, policy, charges, and diagnosis codes.
-6. Finally OUTPUT: A JSON array of comments matching the schema:
-[
-  {
-    "check": "string identifying the issue (e.g. icu_justification, diagnosis_support, room_rent_sublimit, policy_exclusion, duplicate_charge, clean)",
-    "severity": "high" | "medium" | "low",
-    "assignee_role": "billing" | "doctor",
-    "focus": "ResourceType/id (e.g. ChargeItem/charge-001-2 or Condition/cond-001)",
-    "explanation": "concise explanation under 40 words",
-    "evidence": {
-      "source": "ResourceType/id or Policy/Clause-X",
-      "quote": "EXACT verbatim substring from the clinical note or policy"
-    },
-    "suggested_fix": {
-      "type": "code_change" | "doctor_note" | "document_request" | "charge_correction",
-      "draft": "actionable draft fix or addendum note (remember: never invent facts or vitals; leave a blank for undocumented reasons)"
-    }
-  }
-]
-If the claim is clean with zero discrepancies, output an empty array [] or a low severity "clean" comment.`;
+3. When the record does not support a charge (e.g. ICU days with stable vitals), a doctor_note fix must leave a blank "[Document clinical reason: ________]" for the doctor or say billing should reclassify the days to ward rate.
+4. Output a JSON array of findings with check, severity, assignee_role, focus, explanation, evidence, and suggested_fix. If the claim is clean and compliant with all policy rules, return an empty array [].`;
 
-  // Start chat/loop
   const contents: any[] = [
     {
       role: 'user',
-      parts: [
-        {
-          text: `Please review encounter ${encounterId}. First output your review plan checklist as a JSON object with a "plan" array. Then use the available tools to investigate. Finally output your findings comments.`,
-        },
-      ],
+      parts: [{ text: `Review encounter ${encounterId}. Plan first, call tools, and output findings comments as a JSON array.` }],
     },
   ];
 
-  let turn = 0;
-  const maxTurns = 12;
-  let rawComments: AgentComment[] = [];
+  let rawComments: AgentComment[] | null = null;
+  const MAX_TURNS = 8;
+  let turn = 1;
+  let finalResponseText = '';
+  let completed = false;
 
-  while (turn < maxTurns) {
-    turn++;
-    const response = await ai.models.generateContent({
-      model: modelName,
-      contents,
-      config: {
-        systemInstruction,
-        temperature: 0.1,
-        tools: [{ functionDeclarations: toolDeclarations as any }],
-      },
-    });
-
-    const candidate = response.candidates?.[0];
-    if (!candidate || !candidate.content) break;
-
-    contents.push(candidate.content);
-
-    // Extract text output (may contain plan or final output)
-    const textPart = candidate.content.parts?.find(p => p.text);
-    if (textPart && textPart.text) {
-      const text = textPart.text.trim();
-      // Try parsing for plan
-      if (text.includes('"plan"') || text.includes('checklist')) {
-        try {
-          const jsonMatch = text.match(/\{[\s\S]*"plan"[\s\S]*\}/);
-          if (jsonMatch) {
-            const planObj = JSON.parse(jsonMatch[0]);
-            onEvent({ stage: 'plan', data: planObj });
-          }
-        } catch {
-          onEvent({ stage: 'plan', data: { text } });
-        }
-      }
-
-      // Check for comments JSON array
-      if (text.includes('[') && text.includes('"check"') && text.includes('"severity"')) {
-        try {
-          const match = text.match(/\[[\s\S]*\]/);
-          if (match) {
-            rawComments = JSON.parse(match[0]);
-            onEvent({ stage: 'output', data: rawComments });
-          }
-        } catch (err) {
-          console.warn('Could not parse comments array directly:', err);
-        }
-      }
-    }
-
-    // Check for tool calls
-    const functionCalls = response.functionCalls;
-    if (functionCalls && functionCalls.length > 0) {
-      const toolResponseParts: any[] = [];
-
-      for (const fc of functionCalls) {
-        onEvent({
-          stage: 'tool_call',
-          data: { name: fc.name, args: fc.args, turn },
-        });
-
-        let toolResult: any = null;
-        try {
-          if (fc.name === 'fhir_search') toolResult = await tools.fhir_search(fc.args as any);
-          else if (fc.name === 'get_note_text') toolResult = await tools.get_note_text(fc.args as any);
-          else if (fc.name === 'get_policy_clauses') toolResult = await tools.get_policy_clauses(fc.args as any);
-          else if (fc.name === 'lookup_diagnosis_code') toolResult = await tools.lookup_diagnosis_code(fc.args as any);
-          else if (fc.name === 'find_duplicate_charges') toolResult = await tools.find_duplicate_charges(fc.args as any);
-          else if (fc.name === 'check_charge_totals') toolResult = await tools.check_charge_totals(fc.args as any);
-          else if (fc.name === 'check_required_documents') toolResult = await tools.check_required_documents(fc.args as any);
-          else toolResult = { error: `Unknown tool ${fc.name}` };
-        } catch (err: any) {
-          toolResult = { error: err.message || String(err) };
-        }
-
-        onEvent({
-          stage: 'tool_result',
-          data: { name: fc.name, result: toolResult, turn },
-        });
-
-        toolResponseParts.push({
-          functionResponse: {
-            name: fc.name,
-            response: toolResult,
-          },
-        });
-      }
-
-      contents.push({
-        role: 'user',
-        parts: toolResponseParts,
+  try {
+    while (turn <= MAX_TURNS && !completed) {
+      const response = await clientInfo.ai.models.generateContent({
+        model: clientInfo.modelName,
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.1,
+          tools: [{ functionDeclarations: toolDeclarations as any }],
+        },
       });
-    } else {
-      // No more tool calls; Gemini has finished its generation
-      break;
+
+      const candidate = response.candidates?.[0];
+      if (!candidate || !candidate.content) {
+        throw new Error('Gemini returned an empty candidate response');
+      }
+
+      // Emit plan progress event ONLY if the model actually generated a plan in text
+      for (const part of candidate.content.parts || []) {
+        if ('text' in part && part.text) {
+          const textVal = part.text.trim();
+          if (/^plan\b/i.test(textVal) || /audit plan/i.test(textVal)) {
+            onEvent({ stage: 'plan', data: { plan: textVal } });
+          }
+        }
+      }
+
+      const functionCalls = response.functionCalls;
+      if (functionCalls && functionCalls.length > 0) {
+        // Append model turn with original candidates[0].content unchanged (to keep thought signatures)
+        contents.push(candidate.content);
+
+        const functionResponses: any[] = [];
+        for (const call of functionCalls) {
+          // Emit tool_call only for calls the model actually made
+          onEvent({
+            stage: 'tool_call',
+            data: { name: call.name, args: call.args, id: call.id, turn },
+          });
+
+          const callName = call.name || '';
+          const handler = callName ? toolHandlers[callName] : undefined;
+          let result: any;
+          if (handler) {
+            try {
+              result = await handler(call.args || {});
+            } catch (toolErr: any) {
+              result = { error: toolErr.message || String(toolErr) };
+            }
+          } else {
+            result = { error: `Tool ${callName} not implemented` };
+          }
+
+          // Emit tool_result
+          onEvent({
+            stage: 'tool_result',
+            data: { name: call.name, result, turn },
+          });
+
+          functionResponses.push({
+            functionResponse: {
+              name: call.name,
+              response: result,
+            },
+          });
+        }
+
+        // Append user turn with matching functionResponse parts
+        contents.push({
+          role: 'user',
+          parts: functionResponses,
+        });
+
+        turn++;
+      } else {
+        finalResponseText = response.text || '';
+        completed = true;
+      }
     }
+
+    if (!completed) {
+      const errorMsg = `Not reviewed: Gemini unavailable (Review loop hit ${MAX_TURNS} turns limit without completing). No findings were created.`;
+      console.error(`[reviewAgent] ${errorMsg}`);
+      onEvent({ stage: 'error', data: { error: errorMsg } });
+      return { tasks: [], gate: 'Not reviewed', error: errorMsg };
+    }
+
+    const trimmed = finalResponseText.trim();
+    if (trimmed === '[]') {
+      rawComments = [];
+    } else {
+      const match = trimmed.match(/\[\s*\{[\s\S]*\}\s*\]/) || (trimmed.startsWith('[') && trimmed.endsWith(']') ? [trimmed] : null);
+      if (match) {
+        try {
+          const parsed = JSON.parse(match[0]);
+          if (Array.isArray(parsed)) {
+            rawComments = parsed;
+          }
+        } catch (jsonErr: any) {
+          console.error('[reviewAgent] JSON parse error:', jsonErr.message, 'Raw text:', trimmed);
+        }
+      }
+    }
+
+    if (rawComments === null) {
+      const errorMsg = `Not reviewed: Gemini unavailable (response cannot be parsed as the expected JSON array of comments). No findings were created.`;
+      console.error(`[reviewAgent] ${errorMsg}. Model text: ${finalResponseText}`);
+      onEvent({ stage: 'error', data: { error: errorMsg } });
+      return { tasks: [], gate: 'Not reviewed', error: errorMsg };
+    }
+
+    onEvent({ stage: 'output', data: rawComments });
+  } catch (err: any) {
+    const reason = err?.message || String(err);
+    const errorMsg = `Not reviewed: Gemini unavailable (${reason}). No findings were created.`;
+    console.error(`[reviewAgent] ${errorMsg}`);
+    onEvent({ stage: 'error', data: { error: errorMsg } });
+    return { tasks: [], gate: 'Not reviewed', error: errorMsg };
   }
 
-  // Step 3: VERIFICATION done in code, NOT by the model
+  // Step 3: Programmatic Verification in code (drops any invalid quotes or fabricated drafts)
   onEvent({ stage: 'verification', data: { rawCount: rawComments.length } });
   const verifiedComments: AgentComment[] = [];
 
@@ -340,7 +372,7 @@ If the claim is clean with zero discrepancies, output an empty array [] or a low
       input: [
         {
           type: { text: 'suggested_fix' },
-          valueString: comment.suggested_fix.draft,
+          valueString: comment.suggested_fix?.draft || '',
         },
       ],
     };
@@ -349,8 +381,7 @@ If the claim is clean with zero discrepancies, output an empty array [] or a low
     createdTasks.push(saved);
   }
 
-  // If no issue tasks were created (e.g. clean encounter), record a completed audit task
-  // so the encounter transitions from "Not reviewed" to "Ready"
+  // If no issue tasks created (clean claim or valid empty array), record a completed audit task
   if (createdTasks.length === 0) {
     const cleanTask: Task = {
       resourceType: 'Task',
@@ -377,7 +408,7 @@ If the claim is clean with zero discrepancies, output an empty array [] or a low
 
   onEvent({ stage: 'tasks_saved', data: { count: createdTasks.length, tasks: createdTasks } });
 
-  // Step 5: GATE calculation
+  // Step 5: Calculate Gate
   const gate = calculateGate(createdTasks);
   onEvent({ stage: 'gate', data: { gate } });
   onEvent({ stage: 'done', data: { gate, tasksCount: createdTasks.length } });

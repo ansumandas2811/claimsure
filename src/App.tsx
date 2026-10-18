@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { Sidebar, NavTab } from './components/Sidebar.tsx';
 import { Header } from './components/Header.tsx';
+import { Dashboard } from './components/Dashboard.tsx';
 import { EncounterTable } from './components/EncounterTable.tsx';
 import { ReviewDesk } from './components/ReviewDesk.tsx';
 import { LegacyImport } from './components/LegacyImport.tsx';
 import { DocumentScanner } from './components/DocumentScanner.tsx';
 import { PolicyViewer } from './components/PolicyViewer.tsx';
-import { EncounterSummary, SystemStatus, UserRole } from './types.ts';
+import { ProfileSettings } from './components/ProfileSettings.tsx';
+import { LegendBar } from './components/LegendBar.tsx';
+import { EncounterSummary, ReadinessGate, SystemStatus, UserRole } from './types.ts';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'worklist' | 'legacy' | 'scanner' | 'policy'>('worklist');
+  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
   const [selectedEncounterId, setSelectedEncounterId] = useState<string | null>(null);
+  const [worklistFilter, setWorklistFilter] = useState<ReadinessGate | 'all'>('all');
   const [role, setRole] = useState<UserRole>('billing');
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [encounters, setEncounters] = useState<EncounterSummary[]>([]);
@@ -17,10 +22,30 @@ export default function App() {
   const [isResetting, setIsResetting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('claimsure_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleSetIsCollapsed = (val: boolean) => {
+    setIsCollapsed(val);
+    try {
+      localStorage.setItem('claimsure_sidebar_collapsed', String(val));
+    } catch {}
+  };
+
   useEffect(() => {
     loadStatus();
     loadEncounters();
   }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const loadStatus = async () => {
     try {
@@ -55,101 +80,144 @@ export default function App() {
       const res = await fetch('/api/reset', { method: 'POST' });
       if (!res.ok) throw new Error('Reset failed');
       const json = await res.json();
-      setToastMessage(json.message || 'Demo backend re-seeded successfully.');
-      setTimeout(() => setToastMessage(null), 4000);
+      showToast(json.message || 'Demo backend re-seeded successfully.');
       await loadEncounters();
       if (selectedEncounterId) {
-        // reload current encounter
+        // stay on encounter review
       }
     } catch (err: any) {
-      setToastMessage(err.message || 'Error resetting demo');
-      setTimeout(() => setToastMessage(null), 4000);
+      showToast(err.message || 'Error resetting demo');
     } finally {
       setIsResetting(false);
     }
   };
 
+  const handleNavigateToWorklist = (filter: ReadinessGate | 'all' = 'all') => {
+    setWorklistFilter(filter);
+    setActiveTab('worklist');
+    setSelectedEncounterId(null);
+  };
+
+  const pendingTasksTotal = encounters.reduce((sum, e) => sum + e.tasksCount.open, 0);
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
-      {/* Header */}
-      <Header
+    <div className="h-screen w-screen overflow-hidden bg-[#F8FAFC] text-slate-900 flex flex-row font-sans">
+      {/* Collapsible & Expandable Left Sidebar Navigation */}
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={tab => {
           setActiveTab(tab);
           setSelectedEncounterId(null);
         }}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={handleSetIsCollapsed}
         status={status}
         role={role}
         setRole={setRole}
         onResetDemo={handleResetDemo}
         isResetting={isResetting}
+        pendingTasksCount={pendingTasksTotal}
       />
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 bg-[#0F2A3D] text-white text-xs py-2.5 px-4 rounded-lg shadow-lg border border-slate-700 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#0B7A70]" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      {/* Main Content Viewport */}
+      <div className="flex-1 h-full flex flex-col overflow-hidden">
+        {/* Top Header Bar */}
+        <Header
+          activeTab={activeTab}
+          selectedEncounterId={selectedEncounterId}
+          onClearSelectedEncounter={() => {
+            setSelectedEncounterId(null);
+            loadEncounters();
+          }}
+          status={status}
+          role={role}
+          setRole={setRole}
+          onResetDemo={handleResetDemo}
+          isResetting={isResetting}
+        />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {selectedEncounterId ? (
-          <ReviewDesk
-            encounterId={selectedEncounterId}
-            onBack={() => {
-              setSelectedEncounterId(null);
-              loadEncounters();
-            }}
-            role={role}
-            systemStatus={status}
-            onRefreshSummary={loadEncounters}
-          />
-        ) : (
-          <>
-            {activeTab === 'worklist' && (
-              <EncounterTable
-                encounters={encounters}
-                onSelectEncounter={id => setSelectedEncounterId(id)}
-                isLoading={isLoading}
-              />
-            )}
-            {activeTab === 'legacy' && (
-              <LegacyImport
-                onSuccess={() => {
-                  loadEncounters();
-                  setToastMessage('Legacy data imported into active FHIR store.');
-                  setTimeout(() => setToastMessage(null), 4000);
-                }}
-              />
-            )}
-            {activeTab === 'scanner' && (
-              <DocumentScanner
-                systemStatus={status}
-                onSuccess={() => {
-                  loadEncounters();
-                  setToastMessage('Scanned document converted to FHIR encounter.');
-                  setTimeout(() => setToastMessage(null), 4000);
-                }}
-              />
-            )}
-            {activeTab === 'policy' && <PolicyViewer />}
-          </>
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-5 right-5 z-50 bg-[#0F2A3D] text-white text-xs py-2.5 px-4 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2">
+            <span className="w-2 h-2 rounded-full bg-[#0B7A70]" />
+            <span className="font-medium">{toastMessage}</span>
+          </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            <span className="font-semibold text-slate-700">ClaimSure</span> · Hospital Claim-Readiness & Pre-Submission Audit Agent
+        {/* Scrollable Main Area (Guaranteed No Viewport Overflow) */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 min-h-0">
+          <div className="max-w-7xl mx-auto space-y-5">
+            {/* Compact LegendBar specifically on Worklist only */}
+            {activeTab === 'worklist' && !selectedEncounterId && (
+              <LegendBar />
+            )}
+
+            {/* View Router */}
+            {selectedEncounterId ? (
+              <ReviewDesk
+                encounterId={selectedEncounterId}
+                onBack={() => {
+                  setSelectedEncounterId(null);
+                  loadEncounters();
+                }}
+                role={role}
+                systemStatus={status}
+                onRefreshSummary={loadEncounters}
+              />
+            ) : (
+              <>
+                {activeTab === 'dashboard' && (
+                  <Dashboard
+                    encounters={encounters}
+                    onSelectEncounter={id => setSelectedEncounterId(id)}
+                    onNavigateToWorklist={handleNavigateToWorklist}
+                    role={role}
+                  />
+                )}
+
+                {activeTab === 'worklist' && (
+                  <EncounterTable
+                    encounters={encounters}
+                    onSelectEncounter={id => setSelectedEncounterId(id)}
+                    isLoading={isLoading}
+                    initialFilter={worklistFilter}
+                    onRefresh={loadEncounters}
+                  />
+                )}
+
+                {activeTab === 'scanner' && (
+                  <DocumentScanner
+                    systemStatus={status}
+                    onSuccess={() => {
+                      loadEncounters();
+                      showToast('Scanned invoice converted to FHIR encounter and added to worklist.');
+                    }}
+                  />
+                )}
+
+                {activeTab === 'legacy' && (
+                  <LegacyImport
+                    onSuccess={() => {
+                      loadEncounters();
+                      showToast('Legacy HIS admissions and charges committed to active FHIR store.');
+                    }}
+                  />
+                )}
+
+                {activeTab === 'policy' && <PolicyViewer />}
+
+                {activeTab === 'settings' && (
+                  <ProfileSettings
+                    role={role}
+                    setRole={setRole}
+                    onSaveToast={showToast}
+                  />
+                )}
+              </>
+            )}
           </div>
-          <div className="text-[11px] text-slate-400 font-mono">
-            FHIR R4 Standard · Navjeevan Demo TPA / Indian Healthcare Specification · Synthetic Data
-          </div>
-        </div>
-      </footer>
+        </main>
+      </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ apiRouter.get('/status', (req: Request, res: Response) => {
       geminiLocation: process.env.GEMINI_LOCATION || 'global',
       fhirDataset: process.env.FHIR_DATASET || '(not set)',
       fhirStore: process.env.FHIR_STORE || '(not set)',
-      reviewModel: process.env.REVIEW_MODEL || 'gemini-2.5-pro',
+      reviewModel: process.env.REVIEW_MODEL || 'gemini-3.8-flash',
       extractModel: process.env.EXTRACT_MODEL || 'gemini-3.8-flash',
     },
   });
@@ -115,6 +115,13 @@ async function getEncounterSummaries() {
         medium: openTasks.filter(t => t.businessStatus?.text?.toLowerCase() === 'medium').length,
         low: openTasks.filter(t => t.businessStatus?.text?.toLowerCase() === 'low').length,
       },
+      openTasks: openTasks.map(t => ({
+        id: t.id,
+        check: t.code?.text || 'unspecified_check',
+        severity: (t.businessStatus?.text?.toLowerCase() || 'medium') as 'high' | 'medium' | 'low',
+        description: t.description || '',
+        owner: t.owner?.display || 'Billing',
+      })),
     });
   }
 
@@ -122,6 +129,19 @@ async function getEncounterSummaries() {
   summaries.sort((a, b) => a.id.localeCompare(b.id));
   return summaries;
 }
+
+/**
+ * GET /api/tasks - List all open and closed tasks across all encounters
+ */
+apiRouter.get('/tasks', async (req: Request, res: Response) => {
+  try {
+    const source = getFhirSource();
+    const tasks = (await source.search('Task', {})) as Task[];
+    res.json(tasks);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
 
 /**
  * GET /api/encounters - List all encounters with readiness pill
@@ -210,17 +230,17 @@ apiRouter.post('/review/:encounterId', async (req: Request, res: Response) => {
   try {
     const config = isGeminiConfigured();
     if (!config.configured) {
+      const errorMsg = `Not reviewed: Gemini unavailable (${config.reason || 'configuration missing'}). No findings were created.`;
+      console.error(`[api] ${errorMsg}`);
       sendEvent({
         stage: 'error',
         data: {
-          error: config.reason || 'Gemini not configured: run gcloud auth application-default login',
+          error: errorMsg,
         },
       });
       res.end();
       return;
     }
-
-    sendEvent({ stage: 'plan', data: { message: `Initiating claim readiness audit for Encounter ${encounterId}...` } });
 
     await runReviewAgent(encounterId, event => {
       sendEvent(event);
@@ -228,12 +248,38 @@ apiRouter.post('/review/:encounterId', async (req: Request, res: Response) => {
 
     res.end();
   } catch (err: any) {
-    console.error('Review agent error:', err);
+    const errorMsg = `Not reviewed: Gemini unavailable (${err.message || String(err)}). No findings were created.`;
+    console.error('Review agent error:', errorMsg);
     sendEvent({
       stage: 'error',
-      data: { error: err.message || String(err) },
+      data: { error: errorMsg },
     });
     res.end();
+  }
+});
+
+/**
+ * POST /api/review-all - Batch audit all encounters
+ */
+apiRouter.post('/review-all', async (req: Request, res: Response) => {
+  try {
+    const config = isGeminiConfigured();
+    if (!config.configured) {
+      res.status(503).json({
+        error: `Not reviewed: Gemini unavailable (${config.reason || 'configuration missing'}). No findings were created.`,
+      });
+      return;
+    }
+    const source = getFhirSource();
+    const encounters = (await source.search('Encounter', {})) as Encounter[];
+    const audited = [];
+    for (const enc of encounters) {
+      const outcome = await runReviewAgent(enc.id, () => {});
+      audited.push({ encounterId: enc.id, gate: outcome.gate, taskCount: outcome.tasks.length, error: outcome.error });
+    }
+    res.json({ success: true, auditedCount: audited.length, audited });
+  } catch (err: any) {
+    res.status(500).json({ error: `Not reviewed: Gemini unavailable (${err.message || String(err)}). No findings were created.` });
   }
 });
 
